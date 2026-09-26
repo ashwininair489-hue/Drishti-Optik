@@ -1,56 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Drishti-Optik social preview">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#eef1fa" />
-      <stop offset="1" stop-color="#dfe5f7" />
+    <linearGradient id="og-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eef1fa"/><stop offset="100%" stop-color="#dfe6f7"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#7c8bff" />
-      <stop offset="1" stop-color="#5fbfe3" />
+    <linearGradient id="og-mark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c86ff"/><stop offset="55%" stop-color="#6fb8e8"/><stop offset="100%" stop-color="#5ec4d4"/>
     </linearGradient>
-    <filter id="clay" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="6" dy="10" stdDeviation="14" flood-color="#7a83b8" flood-opacity="0.35" />
+    <radialGradient id="og-iris" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a2744"/><stop offset="58%" stop-color="#1e3a5e"/><stop offset="100%" stop-color="#0f1d33"/>
+    </radialGradient>
+    <filter id="og-clay" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="6" dy="10" stdDeviation="14" flood-color="#7a83b8" flood-opacity="0.35"/>
     </filter>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)" />
-  <g stroke="#b9c1e2" stroke-width="1" opacity="0.55">
-    <path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200M0 540h1200" />
-    <path d="M100 0v630M200 0v630M300 0v630M400 0v630M500 0v630M600 0v630M700 0v630M800 0v630M900 0v630M1000 0v630M1100 0v630" />
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+  <g stroke="#b9c1e2" stroke-width="1" opacity="0.45">
+    <path d="M0 90h1200M0 180h1200M0 270h1200M0 360h1200M0 450h1200M0 540h1200"/>
+    <path d="M100 0v630M200 0v630M300 0v630M400 0v630M500 0v630M600 0v630M700 0v630M800 0v630M900 0v630M1000 0v630M1100 0v630"/>
   </g>
-
-  <rect x="70" y="70" width="1060" height="490" rx="56" fill="#f6f8ff" filter="url(#clay)" />
-  <rect x="70" y="70" width="1060" height="490" rx="56" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.8" />
-
-  <g transform="translate(130 150)">
-    <circle cx="46" cy="46" r="34" fill="url(#accent)" />
-    <g fill="none" stroke="#f6f8ff" stroke-width="6" stroke-linecap="round">
-      <circle cx="46" cy="46" r="12" />
-      <path d="M46 18v14M46 60v14M18 46h14M60 46h14" />
+  <!-- card -->
+  <rect x="56" y="56" width="1088" height="518" rx="48" fill="#f6f8ff" filter="url(#og-clay)"/>
+  <rect x="56" y="56" width="1088" height="518" rx="48" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.85"/>
+  <!-- mark -->
+  <g transform="translate(102 148)">
+    <rect x="0" y="0" width="128" height="128" rx="32" fill="url(#og-mark)"/>
+    <circle cx="64" cy="64" r="40" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="2.2"/>
+    <circle cx="64" cy="64" r="31" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.1" stroke-dasharray="4.5 4.5"/>
+    <circle cx="64" cy="64" r="23" fill="url(#og-iris)" stroke="rgba(255,255,255,0.8)" stroke-width="1.2"/>
+    <circle cx="64" cy="64" r="15" fill="none" stroke="#7fd4ee" stroke-width="1.4"/>
+    <circle cx="64" cy="64" r="7.2" fill="#0b1628"/>
+    <ellipse cx="60" cy="58.5" rx="3.4" ry="2.5" fill="rgba(255,255,255,0.7)"/>
+    <g stroke="#f6f8ff" stroke-linecap="round" fill="none">
+      <path d="M64 26 V40 M64 88 V102 M26 64 H40 M88 64 H102" stroke-width="2.6"/>
+      <circle cx="64" cy="64" r="1.6" fill="#f6f8ff" stroke="none"/>
     </g>
   </g>
-
-  <text x="130" y="330" font-family="Inter, system-ui, sans-serif" font-size="76" font-weight="800" fill="#2f3557" letter-spacing="-1">
-    DRISHTI-OPTIK
-  </text>
-  <text x="132" y="386" font-family="Inter, system-ui, sans-serif" font-size="30" font-weight="600" fill="#4a527d">
-    AI-Based Virtual Camera Tracking for Mobile FSOC Terminals
-  </text>
-
-  <g font-family="JetBrains Mono, monospace" font-size="21" fill="#5c6698">
-    <text x="132" y="446">COARSE ALIGNMENT · COMPUTER VISION · SIMULATION ENVIRONMENT</text>
+  <g font-family="Inter, system-ui, sans-serif">
+    <text x="102" y="348" font-size="72" font-weight="800" fill="#1a2145" letter-spacing="-0.03em">DRISHTI<tspan font-weight="300" letter-spacing="0.12em">-OPTIK</tspan></text>
+    <text x="104" y="392" font-size="26" font-weight="600" fill="#3d4a7a">AI-Based Virtual Camera Tracking for Mobile FSOC Terminals</text>
   </g>
-
-  <rect x="132" y="474" width="330" height="52" rx="26" fill="#e7ebfa" />
-  <text x="160" y="507" font-family="JetBrains Mono, monospace" font-size="20" fill="#5c6698">
-    PROTOTYPE · NOT AN ISRO PRODUCT
-  </text>
-
-  <g transform="translate(860 190)" opacity="0.9">
-    <circle cx="0" cy="0" r="150" fill="none" stroke="#aab3dd" stroke-width="2" />
-    <circle cx="0" cy="0" r="105" fill="none" stroke="#aab3dd" stroke-width="2" />
-    <circle cx="0" cy="0" r="60" fill="none" stroke="#aab3dd" stroke-width="2" />
-    <path d="M-150 0h300M0 -150v300" stroke="#aab3dd" stroke-width="1.5" />
-    <rect x="42" y="-46" width="86" height="86" rx="18" fill="none" stroke="url(#accent)" stroke-width="5" />
-    <path d="M85 0h60" stroke="url(#accent)" stroke-width="4" stroke-dasharray="10 8" />
+  <g font-family="JetBrains Mono, monospace" font-size="17" fill="#5c6694">
+    <text x="104" y="432">COARSE ALIGNMENT  ·  COMPUTER VISION  ·  SIMULATION ENVIRONMENT</text>
+  </g>
+  <rect x="104" y="456" width="360" height="44" rx="22" fill="#e7ebfa"/>
+  <text x="124" y="484" font-family="JetBrains Mono, monospace" font-size="15" font-weight="600" fill="#5c6694">PROTOTYPE  ·  NOT AN ISRO PRODUCT</text>
+  <!-- orbital hint -->
+  <g transform="translate(900 210)" opacity="0.88">
+    <circle cx="0" cy="0" r="132" fill="none" stroke="#aab3dd" stroke-width="1.6"/>
+    <circle cx="0" cy="0" r="94" fill="none" stroke="#aab3dd" stroke-width="1.6"/>
+    <circle cx="0" cy="0" r="54" fill="none" stroke="#aab3dd" stroke-width="1.6"/>
+    <path d="M-132 0h264M0 -132v264" stroke="#aab3dd" stroke-width="1.2"/>
+    <rect x="46" y="-40" width="72" height="72" rx="16" fill="none" stroke="url(#og-mark)" stroke-width="4.5"/>
+    <path d="M118 0h44" stroke="url(#og-mark)" stroke-width="3.5" stroke-dasharray="8 7"/>
+    <circle cx="82" cy="-4" r="4.5" fill="url(#og-mark)"/>
   </g>
 </svg>
