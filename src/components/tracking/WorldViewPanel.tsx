@@ -64,7 +64,7 @@ export function TiltCardIdle({
   );
 }
 
-function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
+export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -104,8 +104,6 @@ function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
     my.set(0);
   }
 
-  const ref = useRef<HTMLDivElement>(null);
-
   const fovPct = {
     leftPct: ((cam.x - (SIM.fovAzimuthDeg / AZ_RANGE) * MAP_W / 2) / MAP_W) * 100,
     topPct: ((cam.y - (SIM.fovElevationDeg / EL_RANGE) * MAP_H / 2) / MAP_H) * 100,
@@ -122,8 +120,6 @@ function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
         }).join(" L ")
       : null;
 
-  // FOV rectangle — percent-based so it stays aligned in the responsive container
-
   const beaconInFov = telemetry.inFov;
 
   return (
@@ -134,7 +130,7 @@ function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
             <Globe className="size-3.5" aria-hidden="true" /> World view — SIMULATED DATA
           </p>
           <h2 className="mt-1 flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Map className="size-4 text-primary" aria-hidden="true" /> Full simulated environment
+            <Map className="size-4 text-primary" aria-hidden="true" /> Full simulated environment · drag adjusts framing
           </h2>
         </div>
         <SimulatedTag />
@@ -230,25 +226,25 @@ function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
         </motion.div>
 
         {/* Beacon current — pulses when in FOV (percent-based) */}
-          {!reduced && (
-            <motion.div
-              className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{
-                background: beaconInFov ? "color-mix(in oklch, var(--chart-4) 88%, white)" : "color-mix(in oklch, var(--chart-5) 82%, white)",
-                boxShadow: beaconInFov
-                  ? "0 0 12px color-mix(in oklch, var(--chart-4) 55%, transparent), 0 0 24px color-mix(in oklch, var(--chart-4) 28%, transparent)"
-                  : "0 0 10px color-mix(in oklch, var(--chart-5) 45%, transparent)",
-              }}
-              animate={{
-                left: `${beaconPos.x / MAP_W * 100}%`,
-                top: `${beaconPos.y / MAP_H * 100}%`,
-                scale: beaconInFov ? [1, 1.2, 1] : 1,
-              }}
-              transition={{ duration: 1.4, repeat: beaconInFov ? Infinity : 0, ease: "easeInOut" }}
-            >
-              <span className="absolute inset-[-6px] rounded-full border border-white/30" aria-hidden="true" />
-            </motion.div>
-          )}
+        {!reduced && (
+          <motion.div
+            className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background: beaconInFov ? "color-mix(in oklch, var(--chart-4) 88%, white)" : "color-mix(in oklch, var(--chart-5) 82%, white)",
+              boxShadow: beaconInFov
+                ? "0 0 12px color-mix(in oklch, var(--chart-4) 55%, transparent), 0 0 24px color-mix(in oklch, var(--chart-4) 28%, transparent)"
+                : "0 0 10px color-mix(in oklch, var(--chart-5) 45%, transparent)",
+            }}
+            animate={{
+              left: `${beaconPos.x / MAP_W * 100}%`,
+              top: `${beaconPos.y / MAP_H * 100}%`,
+              scale: beaconInFov ? [1, 1.2, 1] : 1,
+            }}
+            transition={{ duration: 1.4, repeat: beaconInFov ? Infinity : 0, ease: "easeInOut" }}
+          >
+            <span className="absolute inset-[-6px] rounded-full border border-white/30" aria-hidden="true" />
+          </motion.div>
+        )}
 
         {/* HUD labels */}
         <div className="pointer-events-none absolute inset-x-2 top-2 flex items-center justify-between gap-2">
@@ -271,7 +267,8 @@ function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
       </div>
 
       <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
-        Full airspace with beacon trail and camera FOV overlay. The rectangle shows exactly what the Camera View panel sees. Smooth, frame-by-frame slewing is driven by the same 30 Hz tick that powers the console. <span className="font-medium text-foreground/70">SIMULATED DATA — demonstration, not hardware.</span>
+        Full airspace with beacon trail and camera FOV overlay. The rectangle shows exactly what the Camera View panel sees. Smooth, frame-by-frame slewing is driven by the same 30 Hz tick that powers the console.{" "}
+        <span className="font-medium text-foreground/70">SIMULATED DATA — demonstration, not hardware.</span>
       </p>
     </ClayPanel>
   );
