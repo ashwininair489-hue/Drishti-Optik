@@ -17,6 +17,7 @@ import { DISCLAIMERS } from "@/lib/site";
 import { STATUS_COPY, fmt } from "@/lib/tracking-engine";
 import { useQuery } from "convex/react";
 import { motion, useReducedMotion } from "framer-motion";
+import { GuidanceArrow } from "@/components/tracking/GuidanceBadge";
 import {
   Activity,
   Camera,
@@ -154,22 +155,36 @@ export default function Dashboard() {
         </ClayPanel>
 
         <div className="space-y-5">
-          <ConfidenceCard confidence={telemetry.confidence} />
+          <ConfidenceCard
+            confidence={telemetry.confidence}
+            fps={telemetry.simulatedFps}
+            latencyMs={telemetry.simulatedLatencyMs}
+            guidance={telemetry.guidance}
+            status={state.status}
+          />
           <ClayPanel className="p-5">
-            <h2 className="text-base font-semibold text-foreground">Target detection</h2>
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-foreground">Target detection — SIMULATED DATA</h2>
+              <SimulatedTag />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <Readout
                 label="Detection"
                 value={telemetry.detected ? "Locked" : "None"}
                 tone={telemetry.detected ? "ok" : "warn"}
               />
-              <Readout label="Target ID" value="TRK-01" />
+              <Readout label="Target ID" value="TRK-01 — SIMULATED" />
               <Readout label="Offset X" value={fmt.px(telemetry.offsetPx.x)} />
               <Readout label="Offset Y" value={fmt.px(telemetry.offsetPx.y)} />
+              <Readout label="Centroid" value={`${telemetry.center.x.toFixed(1)}, ${telemetry.center.y.toFixed(1)} px`} />
+              <Readout
+                label="Bbox"
+                value={`${telemetry.bbox.width}×${telemetry.bbox.height} px — SIMULATED`}
+              />
             </div>
             <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
               Detection is modelled from the virtual target bearing — no trained network runs
-              in this prototype.
+              in this prototype. All values simulated.
             </p>
           </ClayPanel>
         </div>
@@ -290,7 +305,19 @@ export default function Dashboard() {
   );
 }
 
-function ConfidenceCard({ confidence }: { confidence: number }) {
+function ConfidenceCard({
+  confidence,
+  fps,
+  latencyMs,
+  guidance,
+  status,
+}: {
+  confidence: number;
+  fps: number;
+  latencyMs: number;
+  guidance: { azimuth: import("@/lib/tracking-engine").Guidance; elevation: import("@/lib/tracking-engine").Guidance };
+  status: import("@/lib/tracking-engine").TrackingStatus;
+}) {
   const reduced = useReducedMotion();
   const percent = Math.round(confidence * 100);
   const radius = 54;
@@ -337,6 +364,24 @@ function ConfidenceCard({ confidence }: { confidence: number }) {
           A quality signal for the current estimate. It falls as the modelled target moves away
           from boresight and is not calibrated against any hardware.
         </p>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="clay-inset rounded-2xl px-3 py-2.5 text-center">
+          <p className="hud-label">FPS — SIMULATED</p>
+          <p className="hud-value text-sm font-semibold text-foreground">{fps.toFixed(1)}</p>
+        </div>
+        <div className="clay-inset rounded-2xl px-3 py-2.5 text-center">
+          <p className="hud-label">Latency — SIMULATED</p>
+          <p className="hud-value text-sm font-semibold text-foreground">{latencyMs.toFixed(1)} ms</p>
+        </div>
+        <div className="clay-inset rounded-2xl px-3 py-2.5 text-center">
+          <p className="hud-label">Status</p>
+          <p className="hud-value text-xs font-semibold text-foreground">{status}</p>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-2 rounded-full bg-muted/60 px-3 py-1.5 font-mono text-xs text-muted-foreground">
+        Slew <GuidanceArrow axis="azimuth" guidance={guidance.azimuth} /> AZ ·{" "}
+        <GuidanceArrow axis="elevation" guidance={guidance.elevation} /> EL
       </div>
     </ClayPanel>
   );

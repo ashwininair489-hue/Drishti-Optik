@@ -33,3 +33,15 @@ export function beamTransform(start: THREE.Vector3, end: THREE.Vector3) {
   );
   return { length, midpoint, quaternion };
 }
+
+/** Signed azimuth/elevation error from boresight to target, in degrees. */
+export function alignmentErrorDeg(
+  boresightAz: number,
+  boresightEl: number,
+  targetAz: number,
+  targetEl: number,
+): { az: number; el: number; magnitude: number } {
+  const az = targetAz - boresightAz;
+  const el = targetEl - boresightEl;
+  return { az, el, magnitude: Math.hypot(az, el) };
+}

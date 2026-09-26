@@ -1,7 +1,7 @@
 import { ClayPanel } from "@/components/common/Clay";
 import { SimulatedTag, TechBadge } from "@/components/common/Tags";
 import { api } from "@/convex/_generated/api";
-import { SIM, fmt } from "@/lib/tracking-engine";
+import { SIM, fmt, type HistoryPoint } from "@/lib/tracking-engine";
 import { useQuery } from "convex/react";
 import { CalendarClock } from "lucide-react";
 import {
@@ -9,6 +9,8 @@ import {
   AreaChart,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -22,14 +24,11 @@ const MODE_LABEL: Record<string, string> = {
 };
 
 /**
- * Two views of the same story: the live trace of the run in progress, and the
- * sessions that were saved to the database for the signed-in operator.
+ * Two views of the same story: the live trace of the run in progress (error,
+ * confidence, FPS, latency), and the sessions that were saved to the database
+ * for the signed-in operator. All values are SIMULATED.
  */
-export function SessionHistory({
-  trace,
-}: {
-  trace: Array<{ t: number; errorDeg: number; confidence: number }>;
-}) {
+export function SessionHistory({ trace }: { trace: HistoryPoint[] }) {
   const sessions = useQuery(api.simulation.recentSessions, { limit: 6 });
   const stats = useQuery(api.simulation.sessionStats, {});
 
@@ -37,6 +36,8 @@ export function SessionHistory({
     t: Math.round((point.t / SIM.fps) * 10) / 10,
     error: point.errorDeg,
     confidence: Math.round(point.confidence * 1000) / 10,
+    fps: point.fps,
+    latency: point.latencyMs,
   }));
 
   return (
@@ -44,7 +45,7 @@ export function SessionHistory({
       <ClayPanel className="p-5">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="hud-label">Alignment trace</p>
+            <p className="hud-label">Live telemetry — SIMULATED DATA</p>
             <h2 className="mt-1 text-base font-semibold text-foreground">
               Bearing error &amp; confidence over time
             </h2>
@@ -94,12 +95,12 @@ export function SessionHistory({
                     `${value}`,
                     name === "error" ? "Error (°)" : "Confidence (%)",
                   ]}
-                  labelFormatter={(label) => `t+${label}s`}
+                  labelFormatter={(label) => `t+${label}s — SIMULATED`}
                 />
                 <Legend
                   formatter={(value) => (
                     <span className="text-xs text-muted-foreground">
-                      {value === "error" ? "Bearing error (°)" : "Confidence (%)"}
+                      {value === "error" ? "Bearing error (°) — SIMULATED" : "Confidence (%) — SIMULATED"}
                     </span>
                   )}
                 />
@@ -128,12 +129,83 @@ export function SessionHistory({
             tracking to stream simulated offset estimates.
           </p>
         )}
+
+        {/* FPS / latency chart — also SIMULATED. */}
+        {chartData.length > 2 ? (
+          <div className="mt-4">
+            <p className="hud-label mb-2">Frame rate &amp; latency — SIMULATED DATA</p>
+            <div className="clay-inset h-44 w-full rounded-2xl p-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
+                  <CartesianGrid stroke="var(--color-border)" strokeDasharray="4 6" vertical={false} />
+                  <XAxis
+                    dataKey="t"
+                    tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+                    tickLine={false}
+                    axisLine={false}
+                    unit="s"
+                    minTickGap={24}
+                  />
+                  <YAxis
+                    yAxisId="fps"
+                    domain={[SIM.fps - 6, SIM.fps + 0.5]}
+                    tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={38}
+                  />
+                  <YAxis yAxisId="latency" orientation="right" domain={[30, 80]} hide />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 18,
+                      border: "1px solid var(--color-border)",
+                      background: "var(--color-card)",
+                      fontSize: 12,
+                    }}
+                    formatter={(value, name) => [
+                      `${value}${name === "fps" ? " fps" : " ms"}`,
+                      name === "fps" ? "FPS (sim)" : "Latency (sim)",
+                    ]}
+                    labelFormatter={(label) => `t+${label}s — SIMULATED`}
+                  />
+                  <Legend
+                    formatter={(value) => (
+                      <span className="text-xs text-muted-foreground">
+                        {value === "fps" ? "FPS — SIMULATED" : "Latency (ms) — SIMULATED"}
+                      </span>
+                    )}
+                  />
+                  <Line
+                    yAxisId="fps"
+                    type="monotone"
+                    dataKey="fps"
+                    stroke="var(--color-chart-2)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    yAxisId="latency"
+                    type="monotone"
+                    dataKey="latency"
+                    stroke="var(--color-chart-5)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
+              Simulated sensor throughput. Latency grows with bearing error and shrinks as
+              confidence builds — never a measured figure.
+            </p>
+          </div>
+        ) : null}
       </ClayPanel>
 
       <ClayPanel className="p-5">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="hud-label">Alignment history</p>
+            <p className="hud-label">Alignment history — SIMULATED DATA</p>
             <h2 className="mt-1 text-base font-semibold text-foreground">
               Persisted simulation sessions
             </h2>
@@ -159,7 +231,7 @@ export function SessionHistory({
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[34rem] border-separate border-spacing-y-2 text-left">
               <caption className="sr-only">
-                Persisted simulation sessions with their simulated alignment error
+                Persisted simulation sessions with their simulated alignment error — SIMULATED DATA
               </caption>
               <thead>
                 <tr>
@@ -201,8 +273,8 @@ export function SessionHistory({
             {stats && stats.total > 0 && (
               <p className="mt-2 pl-3 text-[11px] text-muted-foreground">
                 Mean final error {fmt.deg(stats.averageFinalErrorDeg)} · best{" "}
-                {fmt.deg(stats.bestFinalErrorDeg)} across the last {stats.total} saved runs.
-                All values simulated.
+                {fmt.deg(stats.bestFinalErrorDeg)} across the last {stats.total} saved runs. All
+                values simulated.
               </p>
             )}
           </div>

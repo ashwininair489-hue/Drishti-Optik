@@ -40,10 +40,10 @@ export function TerminalControls({
     <ClayPanel className="flex flex-col p-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="hud-label">3D optical terminal</p>
+          <p className="hud-label">3D optical terminals — SIMULATED DATA</p>
           <h2 className="mt-1 flex items-center gap-2 text-base font-semibold text-foreground">
             <Box className="size-4 text-primary" aria-hidden="true" />
-            Gimbal &amp; aperture model
+            Two terminals, beam &amp; alignment vector
           </h2>
         </div>
         <SimulatedTag />
@@ -65,6 +65,7 @@ export function TerminalControls({
             targetAzimuthDeg={target.azimuth}
             targetElevationDeg={target.elevation}
             beamProgress={beamProgress}
+            errorMagnitudeDeg={telemetry.errorMagnitudeDeg}
           />
         </Suspense>
         <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-2">

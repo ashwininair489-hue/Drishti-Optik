@@ -10,15 +10,17 @@ export interface TerminalSceneProps {
   targetElevationDeg: number;
   /** 0 → target not in view, 1 → full acquisition beam. */
   beamProgress: number;
+  /** Alignment error magnitude (deg) — controls the alignment vector arrow. */
+  errorMagnitudeDeg?: number;
   className?: string;
 }
 
 /**
- * The interactive 3D view of the virtual terminal.
+ * The interactive 3D view of the virtual terminal pair.
  *
  * Orientation is driven directly by the simulation state — the same azimuth and
  * elevation shown in the numeric readouts — so the model and the numbers can
- * never disagree.
+ * never disagree. Two FSOC terminals and the beam between them are shown.
  */
 export default function TerminalScene({
   azimuthDeg,
@@ -26,6 +28,7 @@ export default function TerminalScene({
   targetAzimuthDeg,
   targetElevationDeg,
   beamProgress,
+  errorMagnitudeDeg = 0,
   className,
 }: TerminalSceneProps) {
   const reduced = useReducedMotion();
@@ -34,13 +37,7 @@ export default function TerminalScene({
     <div
       className={className}
       role="img"
-      aria-label={`3D terminal model. Simulated boresight azimuth ${azimuthDeg.toFixed(
-        2,
-      )} degrees, elevation ${elevationDeg.toFixed(
-        2,
-      )} degrees, aiming at a virtual target ${targetAzimuthDeg.toFixed(
-        2,
-      )} by ${targetElevationDeg.toFixed(2)} degrees.`}
+      aria-label={`3D model of two FSOC terminals. Local boresight azimuth ${azimuthDeg.toFixed(2)}°, elevation ${elevationDeg.toFixed(2)}°, partner at azimuth ${targetAzimuthDeg.toFixed(2)}° elevation ${targetElevationDeg.toFixed(2)}°. The optical beam and the residual alignment vector are simulated.`}
     >
       <Canvas
         camera={{ position: [5.2, 3.1, 6.2], fov: 40 }}
@@ -57,6 +54,7 @@ export default function TerminalScene({
             targetAzimuthDeg={targetAzimuthDeg}
             targetElevationDeg={targetElevationDeg}
             beamProgress={beamProgress}
+            errorMagnitudeDeg={errorMagnitudeDeg}
             animate={!reduced}
           />
         </group>
