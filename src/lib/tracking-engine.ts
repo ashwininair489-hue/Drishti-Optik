@@ -85,7 +85,13 @@ export interface Telemetry {
   /** Angular separation between camera boresight and target (SIMULATED). */
   error: { azimuthDeg: number; elevationDeg: number };
   errorMagnitudeDeg: number;
-  /** Recommended coarse correction, equal and opposite to the error. */
+  /**
+   * Recommended coarse correction, expressed as the slew the terminal must
+   * apply. Convention: `error = target - boresight`, so the correction equals
+   * the error itself and applying it drives the error to zero. (The pixel
+   * readout flips sign on Y because pixel rows increase downwards while
+   * elevation increases upwards.)
+   */
   correction: { azimuthDeg: number; elevationDeg: number };
   confidence: number;
   /** Axis-aligned bounding box in virtual frame pixels. */
@@ -198,7 +204,9 @@ export function deriveTelemetry(state: TrackerState): Telemetry {
     },
     error: { azimuthDeg: round(errorAz, 2), elevationDeg: round(errorEl, 2) },
     errorMagnitudeDeg: round(errorMagnitudeDeg, 3),
-    correction: { azimuthDeg: round(-errorAz, 2), elevationDeg: round(errorEl, 2) },
+    // Slew the camera must perform: identical to the error, on both axes.
+    // (`offsetPx.y` is negated only because pixel rows grow downwards.)
+    correction: { azimuthDeg: round(errorAz, 2), elevationDeg: round(errorEl, 2) },
     confidence: state.confidence,
     bbox: {
       x: clamp(centerX - boxW / 2, -boxW, SIM.frameWidth),

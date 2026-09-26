@@ -139,7 +139,10 @@ export default function Documentation() {
               {[
                 ["ΔX / ΔY", "Pixel offset of the estimated target centre from the frame centre."],
                 ["Bearing error", "Angular separation between boresight and target estimate, per axis."],
-                ["Recommended correction", "Equal and opposite to the bearing error."],
+                [
+                  "Recommended correction",
+                  "The slew to apply — numerically the bearing error itself, on both axes.",
+                ],
                 ["Confidence", "Modelled quality signal for the estimate, not a measurement."],
                 ["Progress", "How far the error has closed against the prototype tolerance."],
               ].map(([term, description]) => (

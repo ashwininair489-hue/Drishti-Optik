@@ -79,7 +79,7 @@ const SECTIONS: TechSection[] = [
     title: "Coarse alignment",
     label: "SIMULATED",
     body: [
-      "The recommended correction is the equal and opposite of the estimated bearing error. Applying it moves the boresight toward the target estimate until the error falls inside the tolerance band.",
+      "Because the error is defined as target minus boresight, the recommended correction is numerically the same slew on both axes: applying it moves the boresight onto the target estimate until the error falls inside the tolerance band.",
       `The prototype treats ${SIM.coarseToleranceDeg}° as “inside tolerance” and slews at a maximum of ${SIM.slewDegPerTick}° per tick. These are demonstration constants, not hardware figures.`,
     ],
     aside:

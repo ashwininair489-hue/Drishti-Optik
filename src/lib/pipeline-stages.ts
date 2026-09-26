@@ -21,14 +21,27 @@ export function deriveStages(
   const locked = status === "tracking" || status === "aligned";
   const done = status === "aligned";
 
+  // Nothing reports "completed" before a session is running: the target being
+  // geometrically inside the field of view is not the same as the pipeline
+  // having detected it.
   return {
     input: running ? "completed" : "waiting",
     preprocess: running ? "completed" : "waiting",
-    detect: telemetry.detected ? "completed" : running ? "processing" : "waiting",
-    features: telemetry.detected ? (locked ? "completed" : "processing") : "waiting",
-    track: locked ? "completed" : telemetry.detected ? "processing" : "waiting",
-    offset: telemetry.detected ? "completed" : "waiting",
-    command: done ? "completed" : telemetry.detected ? "processing" : "waiting",
+    detect: !running ? "waiting" : telemetry.detected ? "completed" : "processing",
+    features: !running || !telemetry.detected
+      ? "waiting"
+      : locked
+        ? "completed"
+        : "processing",
+    track: !running ? "waiting" : locked ? "completed" : telemetry.detected ? "processing" : "waiting",
+    offset: running && telemetry.detected ? "completed" : "waiting",
+    command: !running
+      ? "waiting"
+      : done
+        ? "completed"
+        : telemetry.detected
+          ? "processing"
+          : "waiting",
     confirm: done ? "completed" : "waiting",
   };
 }

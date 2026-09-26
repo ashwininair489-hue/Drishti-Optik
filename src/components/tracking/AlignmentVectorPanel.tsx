@@ -8,8 +8,10 @@ import { MoveDiagonal2, Target } from "lucide-react";
 /**
  * The recommended coarse correction.
  *
- * The correction is the equal-and-opposite of the estimated bearing error, which
- * is why the sign flips between the two blocks below. Everything is simulated.
+ * `error = target - boresight`, so the correction is the slew the terminal must
+ * apply and equals the error on both axes — the same arithmetic the auto-align
+ * slew performs. Only the pixel readout flips sign on Y, because pixel rows
+ * increase downwards while elevation increases upwards.
  */
 export function AlignmentVectorPanel({ telemetry }: { telemetry: Telemetry }) {
   const withinTolerance = telemetry.errorMagnitudeDeg <= SIM.coarseToleranceDeg;
@@ -63,8 +65,9 @@ export function AlignmentVectorPanel({ telemetry }: { telemetry: Telemetry }) {
           Elevation {fmt.deg(telemetry.correction.elevationDeg)}
         </p>
         <p className="mt-2 text-[11px] leading-5 text-muted-foreground">
-          Equal and opposite to the estimated error. Applying this moves the boresight toward
-          the target estimate.
+          The slew to apply: it moves the boresight onto the target estimate, exactly as the
+          auto-align sequence does. Note the pixel readout above shows ΔY with the opposite
+          sign, because pixel rows count downwards while elevation counts upwards.
         </p>
       </ClayInset>
 

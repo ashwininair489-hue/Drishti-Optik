@@ -30,9 +30,22 @@ export interface AnalyticsEnvelope {
 
 const CONSENT_KEY = "drishti-optik.cookie-consent";
 
+/**
+ * Reads a Vite build flag without assuming Vite is present, so this module can
+ * also be imported by the test runner or any non-bundled context.
+ */
+function readBuildFlag(name: string, fallback: boolean): boolean {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    const raw = env?.[name];
+    return raw === undefined ? fallback : raw !== "false";
+  } catch {
+    return fallback;
+  }
+}
+
 /** Analytics must be explicitly enabled at build time to be wired up at all. */
-export const ANALYTICS_SUPPORTED =
-  import.meta.env.VITE_ANALYTICS_ENABLED !== "false";
+export const ANALYTICS_SUPPORTED = readBuildFlag("VITE_ANALYTICS_ENABLED", true);
 
 type ConsentListener = (value: ConsentValue | null) => void;
 const consentListeners = new Set<ConsentListener>();
@@ -71,9 +84,9 @@ export function clearConsent() {
 export function subscribeConsent(listener: ConsentListener) {
   consentListeners.add(listener);
   // Notify on the next frame so the banner animates in after mount.
-  const id = window.setTimeout(() => listener(getConsent()), 0);
+  const id = setTimeout(() => listener(getConsent()), 0);
   return () => {
-    window.clearTimeout(id);
+    clearTimeout(id);
     consentListeners.delete(listener);
   };
 }

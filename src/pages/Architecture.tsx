@@ -142,7 +142,7 @@ const NODES: ArchNode[] = [
     short: "Operator-facing correction",
     group: "Control",
     label_: "SIMULATED",
-    role: "Presents the equal-and-opposite correction and the tolerance status to the operator.",
+    role: "Presents the recommended slew and the tolerance status to the operator, so the correction can be reviewed before it is applied.",
     inputs: "Recommended correction",
     outputs: "Azimuth / elevation correction",
     note: "In manual and assisted modes this is an operator-visible recommendation, not an automatic command.",

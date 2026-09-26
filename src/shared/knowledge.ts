@@ -1,12 +1,14 @@
+import { SIM } from "../lib/tracking-engine";
+
 /**
  * Drishti AI knowledge base.
  *
- * Deliberately dependency-free: it is imported by the browser assistant *and*
- * by the Convex action, so it must never touch `window`, React or Node APIs.
- * It is the fallback whenever no AI key is configured, and the guard rail that
- * keeps the assistant honest about what it can and cannot know.
+ * Imported by the browser assistant *and* by the Convex action, so it must stay
+ * free of `window`, React and Node APIs. Its only dependency is the simulation
+ * engine, and only so the assistant quotes the same tolerance the console
+ * enforces. It is the fallback whenever no AI key is configured, and the guard
+ * rail that keeps the assistant honest about what it can and cannot know.
  */
-
 export interface KnowledgeEntry {
   id: string;
   title: string;
@@ -79,7 +81,7 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     title: "Why is the target offset positive?",
     keywords: ["positive", "negative", "sign", "why is the offset", "offset sign", "delta x"],
     answer:
-      "The sign tells you which way to move. In the virtual frame, positive ΔX means the target centre lies right of the frame centre, so the camera must rotate in the positive azimuth direction to close the gap. Positive ΔY in the readout corresponds to the target sitting above the frame centre, because the vertical pixel axis points down while elevation points up. The recommended correction is therefore the equal-and-opposite of the measured error.",
+      "The sign tells you which way to move. In the virtual frame, positive ΔX means the target centre lies right of the frame centre, so the camera must rotate in the positive azimuth direction to close the gap. Positive ΔY corresponds to the target sitting below the frame centre, because pixel rows are counted downwards while elevation is counted upwards. The recommended correction is the slew to apply: it matches the bearing error on both axes, which is why the ΔY readout and the elevation correction can show opposite signs.",
     followUps: ["What does alignment error represent?", "What is happening in the current simulation?"],
   },
   {
@@ -225,7 +227,9 @@ export function describeSimulation(ctx: SimulationContext): string {
     `${KB_DISCLAIMER}`,
     `The source is in the ${ctx.statusLabel} state using ${ctx.mode.toUpperCase()} mode at a modelled range of ${ctx.distanceKm} km.`,
     `The virtual frame centre offset is ΔX ${ctx.offsetX.toFixed(1)} px and ΔY ${ctx.offsetY.toFixed(1)} px, and the modelled bearing error is ${ctx.errorDeg.toFixed(2)}°.`,
-    ctx.errorDeg <= 0.35
+    // Read the tolerance from the engine so the assistant can never disagree
+    // with the console it is describing.
+    ctx.errorDeg <= SIM.coarseToleranceDeg
       ? "That is inside the prototype tolerance band, so coarse alignment reads as complete."
       : "That is outside the prototype tolerance band, so the console keeps recommending a correction.",
     `Reported tracking confidence is ${ctx.confidencePct.toFixed(1)}%.`,
