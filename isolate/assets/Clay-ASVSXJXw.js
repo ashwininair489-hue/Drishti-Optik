@@ -1,0 +1,1 @@
+import{j as l}from"./framer-motion-DITe7V0b.js";import{a as n}from"./index-BtSfp5F9.js";function m({className:s,size:a="md",hoverable:r=!1,...t}){return l.jsx("div",{className:n(a==="sm"?"clay-sm":a==="lg"?"clay-lg":"clay",r&&"clay-hover",s),...t})}function o({className:s,...a}){return l.jsx("div",{className:n("clay-inset",s),...a})}export{m as C,o as a};

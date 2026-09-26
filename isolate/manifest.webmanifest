@@ -1,0 +1,13 @@
+{
+  "name": "Drishti-Optik — Virtual Camera Tracking Console",
+  "short_name": "Drishti-Optik",
+  "description": "AI-assisted virtual camera tracking simulation for coarse alignment of mobile FSOC terminals. Prototype environment.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef0f8",
+  "theme_color": "#7c86ff",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/logo.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

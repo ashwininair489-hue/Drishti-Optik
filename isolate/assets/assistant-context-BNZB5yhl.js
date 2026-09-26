@@ -1,0 +1,1 @@
+import{r as s}from"./react-vendor-B-jr5_5-.js";const e=s.createContext(null);function r(){const t=s.useContext(e);if(!t)throw new Error("useAssistant must be used inside <AssistantProvider>.");return t}export{e as A,r as u};

@@ -1,0 +1,1 @@
+import{r as s}from"./react-vendor-B-jr5_5-.js";let u=null;const r=new Set;function a(e){u=e,r.forEach(t=>t(e))}function i(){const[e,t]=s.useState(u);return s.useEffect(()=>(r.add(t),()=>{r.delete(t)}),[]),e}export{a as s,i as u};
