@@ -84,12 +84,12 @@ export function Navbar() {
               </span>
             )}
             <Button asChild size="sm" className="clay-press rounded-full px-4">
-              <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
+              <Link to="/login?returnTo=%2Fconsole">
                 <LayoutDashboard className="size-4" aria-hidden="true" />
                 <span className="hidden sm:inline">
-                  {isAuthenticated ? "Console" : "Launch Console"}
+                  {isAuthenticated ? "Console" : "Get access"}
                 </span>
-                <span className="sm:hidden">Console</span>
+                <span className="sm:hidden">Access</span>
               </Link>
             </Button>
             {isAuthenticated && (

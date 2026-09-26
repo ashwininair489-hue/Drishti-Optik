@@ -13,22 +13,36 @@
     <filter id="drishti-soft" x="-40%" y="-40%" width="180%" height="180%">
       <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#2d3560" flood-opacity="0.32"/>
     </filter>
+    <radialGradient id="motion-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7fd4ee" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#7fd4ee" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      @keyframes iris-scan { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+      @keyframes ring-pulse { 0%,100%{opacity:0.9} 50%{opacity:0.45} }
+      @keyframes crosshair-rotate { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+      .iris-box { transform-box: fill-box; transform-origin: center; animation: iris-scan 3.4s ease-in-out infinite; }
+      .dash-ring { animation: ring-pulse 2.6s ease-in-out infinite; }
+      .spin-cross { transform-box: fill-box; transform-origin: center; animation: crosshair-rotate 9s linear infinite; }
+    </style>
   </defs>
   <!-- rounded square canvas -->
   <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#drishti-bg)" filter="url(#drishti-soft)"/>
   <!-- outer aperture ring -->
   <circle cx="48" cy="48" r="28" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="1.6" opacity="0.92"/>
   <circle cx="48" cy="48" r="22.5" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="0.9" stroke-dasharray="3.2 3.2" opacity="0.9"/>
-  <!-- eye / iris -->
-  <circle cx="48" cy="48" r="16.5" fill="url(#drishti-iris)" stroke="rgba(255,255,255,0.85)" stroke-width="1.1"/>
-  <!-- inner iris highlight ring -->
-  <circle cx="48" cy="48" r="10.5" fill="none" stroke="#7fd4ee" stroke-width="1.15" opacity="0.9"/>
+  <!-- eye / iris — slightly breathing for liveliness */
+  <g class="iris-box">
+    <circle cx="48" cy="48" r="16.5" fill="url(#drishti-iris)" stroke="rgba(255,255,255,0.85)" stroke-width="1.1"/>
+  </g>
+  <!-- inner iris highlight ring — pulsing ring */
+  <circle cx="48" cy="48" r="10.5" fill="none" stroke="#7fd4ee" stroke-width="1.15" opacity="0.9" class="dash-ring"/>
   <!-- pupil -->
   <circle cx="48" cy="48" r="5.2" fill="#0b1628" stroke="rgba(255,255,255,0.35)" stroke-width="0.7"/>
   <!-- specular highlight -->
   <ellipse cx="45.2" cy="44.2" rx="2.3" ry="1.7" fill="rgba(255,255,255,0.72)"/>
-  <!-- crosshair -->
-  <g stroke="#f6f8ff" stroke-linecap="round" opacity="0.95">
+  <!-- crosshair — subtle rotation for motion */
+  <g stroke="#f6f8ff" stroke-linecap="round" opacity="0.95" class="spin-cross">
     <path d="M48 20.5 V30 M48 66 V75.5 M20.5 48 H30 M66 48 H75.5" stroke-width="2.1"/>
     <circle cx="48" cy="48" r="1.35" fill="#f6f8ff" stroke="none"/>
   </g>

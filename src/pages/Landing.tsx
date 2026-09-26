@@ -204,8 +204,7 @@ export default function Landing() {
           <Reveal delay={0.12}>
             <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:items-center">
               <Button asChild size="lg" className="clay-press group rounded-full px-6">
-                <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
-                  Launch tracking console
+                <Link to="/login?returnTo=%2Fconsole">
                   <motion.span
                     className="inline-flex"
                     animate={reduced ? undefined : { x: [0, 4, 0] }}
@@ -213,6 +212,7 @@ export default function Landing() {
                   >
                     <ArrowRight className="size-4" aria-hidden="true" />
                   </motion.span>
+                  Get access — sign in
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="clay-press rounded-full px-6">
@@ -252,23 +252,32 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          {/* quick pill links */}
+          {/* quick pill links — staggered entrance + hover lift */}
           <div className="mt-6 flex flex-wrap gap-2">
             {[
               { icon: Orbit, label: "2 terminals", to: "/console" },
               { icon: Zap, label: "Live telemetry", to: "/console" },
               { icon: Satellite, label: "3D beam", to: "/console" },
-            ].map((p) => {
+            ].map((p, i) => {
               const I = p.icon;
               return (
-                <Link
+                <motion.div
                   key={p.label}
-                  to={p.to}
-                  className="clay-sm clay-press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground"
+                  initial={reduced ? undefined : { opacity: 0, y: 6 }}
+                  animate={reduced ? undefined : { opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.4 }}
+                  whileHover={reduced ? undefined : { scale: 1.05 }}
+                  whileTap={reduced ? undefined : { scale: 0.96 }}
+                  className="inline-flex"
                 >
-                  <I className="size-3.5 text-primary" aria-hidden="true" />
-                  {p.label}
-                </Link>
+                  <Link
+                    to={p.to}
+                    className="clay-sm clay-press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground"
+                  >
+                    <I className="size-3.5 text-primary" aria-hidden="true" />
+                    {p.label}
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
@@ -311,11 +320,15 @@ export default function Landing() {
                   { label: "Field of view", value: `${SIM.fovAzimuthDeg}° × ${SIM.fovElevationDeg}°` },
                   { label: "Tolerance", value: `${SIM.coarseToleranceDeg}°` },
                   { label: "Sensor", value: `${SIM.frameWidth}×${SIM.frameHeight}` },
-                ].map((item) => (
+                ].map((item, i) => (
                   <motion.div
                     key={item.label}
-                    whileHover={reduced ? undefined : { scale: 1.04 }}
+                    initial={reduced ? undefined : { opacity: 0, y: 6 }}
+                    whileHover={reduced ? undefined : { scale: 1.04, y: -2 }}
+                    transition={{ type: "spring", stiffness: 360, damping: 18 }}
+                    animate={reduced ? undefined : { opacity: 1, y: 0 }}
                     className="rounded-2xl bg-white/5 px-2.5 py-2 backdrop-blur-sm"
+                    style={reduced ? undefined : { transitionDelay: `${0.05 + i * 0.05}s` }}
                   >
                     <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-white/50">{item.label}</p>
                     <p className="hud-value mt-0.5 text-xs font-semibold text-white/90">{item.value}</p>
@@ -480,13 +493,13 @@ export default function Landing() {
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[radial-gradient(circle_at_center,color-mix(in_oklch,var(--chart-1)_22%,transparent),transparent_70%)] blur-2xl"
-            animate={reduced ? undefined : { scale: [1, 1.08, 1], opacity: [0.5, 0.7, 0.5] }}
+            animate={reduced ? undefined : { scale: [1, 1.09, 1], opacity: [0.5, 0.7, 0.5] }}
             transition={reduced ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute -bottom-20 -left-20 size-72 rounded-full bg-[radial-gradient(circle_at_center,color-mix(in_oklch,var(--chart-2)_18%,transparent),transparent_70%)] blur-2xl"
-            animate={reduced ? undefined : { scale: [1, 1.06, 1], opacity: [0.45, 0.6, 0.45] }}
+            animate={reduced ? undefined : { scale: [1, 1.07, 1], opacity: [0.45, 0.6, 0.45] }}
             transition={reduced ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
           />
           <div className="relative flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -507,9 +520,9 @@ export default function Landing() {
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row lg:flex-col">
               <Button asChild size="lg" className="clay-press rounded-full">
-                <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
+                <Link to="/login?returnTo=%2Fconsole">
                   <Target className="size-4" aria-hidden="true" />
-                  Launch tracking console
+                  Sign in to open the console
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="clay-press rounded-full">

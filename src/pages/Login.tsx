@@ -127,7 +127,7 @@ const FLOAT_STATS = [
 
 export default function Login() {
   usePageMeta({
-    title: "Sign in — Drishti-Optik",
+    title: "Get access — Drishti-Optik",
     description:
       "Sign in to Drishti-Optik: one-time email codes or a demo session. Access the virtual camera tracking console — a simulation, not an official ISRO product.",
     path: "/login",
@@ -152,22 +152,25 @@ export default function Login() {
   const [shake, setShake] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && step !== "success") navigate(redirect, { replace: true });
+    if (!authLoading && isAuthenticated && step !== "success") {
+      navigate(redirect, { replace: true });
+    }
   }, [authLoading, isAuthenticated, navigate, redirect, step]);
 
   useEffect(() => {
     if (step !== "success" || !name.trim() || !user) return;
+
     let cancelled = false;
-    let t: number | undefined;
+    let t: ReturnType<typeof setTimeout> | undefined;
     (async () => {
       try {
         await updateName({ name: name.trim() });
-      } catch {}
-      if (!cancelled) t = window.setTimeout(() => navigate(redirect, { replace: true }), 900);
+      } catch { /* best-effort */ }
+      if (!cancelled) t = setTimeout(() => navigate(redirect, { replace: true }), 900);
     })();
     return () => {
       cancelled = true;
-      if (t !== undefined) window.clearTimeout(t);
+      if (t !== undefined) clearTimeout(t);
     };
   }, [step, name, user, updateName, navigate, redirect]);
 
@@ -183,7 +186,7 @@ export default function Login() {
     setFieldErr(errs);
     if (Object.keys(errs).length) {
       setShake(true);
-      window.setTimeout(() => setShake(false), 420);
+      setTimeout(() => setShake(false), 420);
       return;
     }
     setBusy("sending");
@@ -200,7 +203,7 @@ export default function Login() {
           : "We couldn't reach the sign-in service. Check your connection."
       );
       setShake(true);
-      window.setTimeout(() => setShake(false), 420);
+      setTimeout(() => setShake(false), 420);
     } finally {
       setBusy(null);
     }

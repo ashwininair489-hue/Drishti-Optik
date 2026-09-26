@@ -1,8 +1,9 @@
+import React, { useRef } from "react";
 import { ClayPanel } from "@/components/common/Clay";
 import { SimulatedTag } from "@/components/common/Tags";
 import { SIM, type Telemetry } from "@/lib/tracking-engine";
 import { cn } from "@/lib/utils";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Globe, Map, Scan, Target } from "lucide-react";
 
 interface WorldViewPanelProps {
@@ -23,8 +24,50 @@ interface WorldViewPanelProps {
  * All coordinates are SIMULATED. The panel is intentionally larger than the
  * 12°×7° camera frustum so loss / re-acquisition is obvious at a glance.
  */
-export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
+export function TiltCardIdle({
+  children,
+  className,
+  disableIdle = false,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  disableIdle?: boolean;
+}) {
+  const pref = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [4, -4]), { stiffness: 120, damping: 16 });
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-5, 5]), { stiffness: 120, damping: 16 });
+
+  function onMove(e: React.MouseEvent) {
+    if (pref || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  }
+  function onLeave() {
+    mx.set(0);
+    my.set(0);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={pref || disableIdle ? undefined : { rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
+      className={cn("will-change-transform", className)}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelProps) {
   const reduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+
   const trail = telemetry.beaconTrail ?? [];
   // Map simulation degrees → SVG viewBox 0..320 × 0..180
   const MAP_W = 320;
@@ -41,12 +84,28 @@ export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelP
   }
 
   const cam = project(camera);
-  const currentBeaconPct = (() => {
-    const p = trail.length
-      ? project({ azimuth: trail[trail.length - 1]!.azimuth, elevation: trail[trail.length - 1]!.elevation })
-      : project({ azimuth: 3.1, elevation: -2.2 });
-    return { leftPct: (p.x / MAP_W) * 100, topPct: (p.y / MAP_H) * 100 };
-  })();
+  const trailBeacon = trail.length > 0 ? trail[trail.length - 1] : { azimuth: 3.1, elevation: -2.2 };
+  const beaconPos = project(trailBeacon);
+
+  // Kick the beacon a touch so it does not sit perfectly still.
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [3, -3]), { stiffness: 120, damping: 14 });
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-3, 3]), { stiffness: 120, damping: 14 });
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (reduced || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  }
+  function onLeave() {
+    mx.set(0);
+    my.set(0);
+  }
+
+  const ref = useRef<HTMLDivElement>(null);
+
   const fovPct = {
     leftPct: ((cam.x - (SIM.fovAzimuthDeg / AZ_RANGE) * MAP_W / 2) / MAP_W) * 100,
     topPct: ((cam.y - (SIM.fovElevationDeg / EL_RANGE) * MAP_H / 2) / MAP_H) * 100,
@@ -81,7 +140,12 @@ export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelP
         <SimulatedTag />
       </header>
 
-      <div className="clay-screen relative mt-4 overflow-hidden aspect-[16/9]">
+      <div
+        ref={ref}
+        onMouseMove={onMove}
+        onMouseLeave={onLeave}
+        className="clay-screen relative mt-4 overflow-hidden aspect-[16/9]"
+      >
         {/* Background gradient */}
         <div
           className="absolute inset-0"
@@ -166,19 +230,25 @@ export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelP
         </motion.div>
 
         {/* Beacon current — pulses when in FOV (percent-based) */}
-        <motion.div
-          className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: beaconInFov ? "color-mix(in oklch, var(--chart-4) 88%, white)" : "color-mix(in oklch, var(--chart-5) 82%, white)",
-            boxShadow: beaconInFov
-              ? "0 0 12px color-mix(in oklch, var(--chart-4) 55%, transparent), 0 0 24px color-mix(in oklch, var(--chart-4) 28%, transparent)"
-              : "0 0 10px color-mix(in oklch, var(--chart-5) 45%, transparent)",
-          }}
-          animate={{ scale: beaconInFov && !reduced ? [1, 1.18, 1] : 1, left: `${currentBeaconPct.leftPct}%`, top: `${currentBeaconPct.topPct}%` }}
-          transition={{ duration: reduced ? 0 : 1.1, repeat: reduced || !beaconInFov ? 0 : Infinity, ease: "easeInOut" }}
-        >
-          <span className="absolute inset-[-6px] rounded-full border border-white/30" aria-hidden="true" />
-        </motion.div>
+          {!reduced && (
+            <motion.div
+              className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background: beaconInFov ? "color-mix(in oklch, var(--chart-4) 88%, white)" : "color-mix(in oklch, var(--chart-5) 82%, white)",
+                boxShadow: beaconInFov
+                  ? "0 0 12px color-mix(in oklch, var(--chart-4) 55%, transparent), 0 0 24px color-mix(in oklch, var(--chart-4) 28%, transparent)"
+                  : "0 0 10px color-mix(in oklch, var(--chart-5) 45%, transparent)",
+              }}
+              animate={{
+                left: `${beaconPos.x / MAP_W * 100}%`,
+                top: `${beaconPos.y / MAP_H * 100}%`,
+                scale: beaconInFov ? [1, 1.2, 1] : 1,
+              }}
+              transition={{ duration: 1.4, repeat: beaconInFov ? Infinity : 0, ease: "easeInOut" }}
+            >
+              <span className="absolute inset-[-6px] rounded-full border border-white/30" aria-hidden="true" />
+            </motion.div>
+          )}
 
         {/* HUD labels */}
         <div className="pointer-events-none absolute inset-x-2 top-2 flex items-center justify-between gap-2">
