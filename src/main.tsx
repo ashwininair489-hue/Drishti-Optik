@@ -11,6 +11,7 @@ import "./index.css";
 
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const TrackingConsole = lazy(() => import("./pages/TrackingConsole.tsx"));
 const Technology = lazy(() => import("./pages/Technology.tsx"));
@@ -204,10 +205,8 @@ createRoot(document.getElementById("root")!).render(
                   />
                   <Route path="*" element={<NotFound />} />
                 </Route>
-                <Route
-                  path="/auth"
-                  element={<AuthPage redirectAfterAuth="/console" />}
-                />
+                <Route path="/login" element={<Login />} />
+                <Route path="/auth" element={<AuthPage redirectAfterAuth="/console" />} />
               </Routes>
             </AssistantProvider>
           </Suspense>

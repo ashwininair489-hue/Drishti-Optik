@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { DISCLAIMERS, SITE } from "@/lib/site";
 import { usePageMeta } from "@/lib/seo";
 import { SIM } from "@/lib/tracking-engine";
+import { cn } from "@/lib/utils";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import {
   ArrowRight,
   BrainCircuit,
@@ -15,12 +17,17 @@ import {
   Crosshair,
   Gauge,
   Layers,
+  Orbit,
   Radar,
+  Rocket,
+  Satellite,
   Sigma,
+  Sparkles,
   Target,
   Waves,
+  Zap,
 } from "lucide-react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useRef } from "react";
 import { Link } from "react-router";
 
 const HeroScene = lazy(() => import("@/components/three/HeroScene"));
@@ -69,8 +76,69 @@ const CAPABILITIES = [
   },
 ];
 
+/* ── interactive tilt card ─────────────────────────────────────────── */
+function TiltCard({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const reduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [4, -4]), { stiffness: 120, damping: 16 });
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-5, 5]), { stiffness: 120, damping: 16 });
+
+  function onMove(e: React.MouseEvent) {
+    if (reduced || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  }
+  function onLeave() {
+    mx.set(0);
+    my.set(0);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={reduced ? undefined : { rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
+      className={cn("will-change-transform", className)}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ── animated counter ──────────────────────────────────────────────── */
+function CountUp({ value, suffix = "" }: { value: string; suffix?: string }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.span
+      initial={reduced ? undefined : { opacity: 0, y: 6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: reduced ? 0 : 0.5 }}
+      className="hud-value text-2xl font-extrabold text-foreground sm:text-3xl"
+    >
+      {value}
+      {suffix && <span className="text-primary">{suffix}</span>}
+    </motion.span>
+  );
+}
+
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const reduced = useReducedMotion();
+  const heroMx = useMotionValue(0);
+  const heroMy = useMotionValue(0);
+  const spotX = useSpring(heroMx, { stiffness: 80, damping: 20 });
+  const spotY = useSpring(heroMy, { stiffness: 80, damping: 20 });
 
   usePageMeta({
     title: "Drishti-Optik | AI-Based Virtual Camera Tracking for FSOC",
@@ -81,8 +149,32 @@ export default function Landing() {
 
   return (
     <div className="space-y-16 sm:space-y-24">
-      <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
-        <div>
+      {/* ── HERO — interactive spotlight + parallax 3D ───────────── */}
+      <section
+        onMouseMove={(e) => {
+          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          heroMx.set(((e.clientX - r.left) / r.width) * 100);
+          heroMy.set(((e.clientY - r.top) / r.height) * 100);
+        }}
+        className="relative -mx-4 -mt-6 overflow-hidden rounded-[2rem] border border-border/50 bg-[radial-gradient(90%_70%_at_20%_12%,color-mix(in_oklch,var(--chart-1)_14%,transparent),transparent_60%),radial-gradient(70%_60%_at_88%_88%,color-mix(in_oklch,var(--chart-2)_12%,transparent),transparent_55%),linear-gradient(180deg,var(--background),color-mix(in_oklch,var(--background)_94%,white))] px-4 py-10 sm:mx-0 sm:px-8 sm:py-12 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10 lg:px-10"
+      >
+        {/* spotlight that follows cursor */}
+        {!reduced && (
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 opacity-60"
+            style={{
+              background: useTransform(
+                [spotX, spotY],
+                ([x, y]) =>
+                  `radial-gradient(520px circle at ${x}% ${y}%, color-mix(in oklch, var(--chart-1) 10%, transparent), transparent 72%)`
+              ) as unknown as string,
+            }}
+          />
+        )}
+        <div className="hud-grid pointer-events-none absolute inset-0 opacity-[0.35]" aria-hidden="true" />
+
+        <div className="relative">
           <Reveal>
             <TechBadge tone="busy" pulse>
               {SITE.statusBadge}
@@ -91,9 +183,15 @@ export default function Landing() {
 
           <Reveal delay={0.06}>
             <h1 className="mt-5 text-balance text-4xl font-extrabold uppercase leading-[1.02] tracking-tight text-foreground sm:text-5xl xl:text-6xl">
-              <span className="hud-value bg-[linear-gradient(120deg,color-mix(in_oklch,var(--chart-1)_82%,black),color-mix(in_oklch,var(--chart-2)_78%,black))] bg-clip-text text-transparent">
+              <motion.span
+                initial={reduced ? undefined : { backgroundPosition: "100% 50%" }}
+                animate={reduced ? undefined : { backgroundPosition: "0% 50%" }}
+                transition={reduced ? undefined : { duration: 1.2, ease: "easeOut", delay: 0.2 }}
+                className="hud-value bg-[linear-gradient(120deg,color-mix(in_oklch,var(--chart-1)_82%,black),color-mix(in_oklch,var(--chart-2)_78%,black),color-mix(in_oklch,var(--chart-1)_82%,black))] bg-clip-text text-transparent"
+                style={reduced ? undefined : { backgroundSize: "200% 100%" }}
+              >
                 Drishti-Optik
-              </span>
+              </motion.span>
             </h1>
             <p className="mt-3 max-w-xl text-pretty text-lg font-semibold leading-7 text-foreground/90 sm:text-xl">
               AI-based virtual camera tracking for mobile FSOC terminal coarse alignment.
@@ -105,10 +203,16 @@ export default function Landing() {
 
           <Reveal delay={0.12}>
             <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:items-center">
-              <Button asChild size="lg" className="clay-press rounded-full px-6">
-                <Link to={isAuthenticated ? "/console" : "/auth?mode=signin&returnTo=%2Fconsole"}>
+              <Button asChild size="lg" className="clay-press group rounded-full px-6">
+                <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
                   Launch tracking console
-                  <ArrowRight className="size-4" aria-hidden="true" />
+                  <motion.span
+                    className="inline-flex"
+                    animate={reduced ? undefined : { x: [0, 4, 0] }}
+                    transition={reduced ? undefined : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </motion.span>
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="clay-press rounded-full px-6">
@@ -119,47 +223,73 @@ export default function Landing() {
 
           <Reveal delay={0.18}>
             <p className="mt-5 max-w-xl text-xs leading-5 text-muted-foreground">
-              Built around the stated ISRO problem statement {SITE.problemStatementId}.{" "}
-              {DISCLAIMERS.notIsro}
+              Built around the stated ISRO problem statement {SITE.problemStatementId}. {DISCLAIMERS.notIsro}
             </p>
           </Reveal>
 
+          {/* lively stats — each card reacts on hover */}
           <Reveal delay={0.24}>
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              <StatTile
-                label="Pipeline stages"
-                value="08"
-                tag={<CredibilityTag label="PROPOSED" />}
-                hint="Image input through alignment confirmation"
-              />
-              <StatTile
-                label="Data source"
-                value="Simulation"
-                tag={<CredibilityTag label="SIMULATED" />}
-                hint="No hardware telemetry is used"
-              />
-              <StatTile
-                label="Physical control"
-                value="None"
-                hint="This prototype commands no terminal"
-              />
+              <motion.div whileHover={reduced ? undefined : { y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 320, damping: 18 }} className="clay-sm flex flex-col gap-1 rounded-2xl px-4 py-4">
+                <CountUp value="08" />
+                <span className="hud-label">Pipeline stages</span>
+                <CredibilityTag label="PROPOSED" className="mt-1" />
+              </motion.div>
+              <motion.div whileHover={reduced ? undefined : { y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 320, damping: 18 }} className="clay-sm flex flex-col gap-1 rounded-2xl px-4 py-4">
+                <span className="flex items-center gap-1.5">
+                  <span className="hud-value text-2xl font-extrabold text-foreground sm:text-3xl">SIM</span>
+                  <Rocket className="size-4 text-primary" aria-hidden="true" />
+                </span>
+                <span className="hud-label">Data source</span>
+                <CredibilityTag label="SIMULATED" className="mt-1" />
+              </motion.div>
+              <motion.div whileHover={reduced ? undefined : { y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 320, damping: 18 }} className="clay-sm flex flex-col gap-1 rounded-2xl px-4 py-4">
+                <span className="hud-value text-2xl font-extrabold text-foreground sm:text-3xl">—</span>
+                <span className="hud-label">Physical control</span>
+                <span className="mt-1 text-xs text-muted-foreground">Commands no terminal</span>
+              </motion.div>
             </div>
           </Reveal>
+
+          {/* quick pill links */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {[
+              { icon: Orbit, label: "2 terminals", to: "/console" },
+              { icon: Zap, label: "Live telemetry", to: "/console" },
+              { icon: Satellite, label: "3D beam", to: "/console" },
+            ].map((p) => {
+              const I = p.icon;
+              return (
+                <Link
+                  key={p.label}
+                  to={p.to}
+                  className="clay-sm clay-press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground"
+                >
+                  <I className="size-3.5 text-primary" aria-hidden="true" />
+                  {p.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        <Reveal delay={0.1}>
-          <ClayPanel size="lg" className="p-3 sm:p-4">
+        <TiltCard className="mt-8 lg:mt-0">
+          <ClayPanel size="lg" className="relative p-3 sm:p-4">
+            {/* shimmer border */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-[calc(var(--radius)+1.1rem)] opacity-40"
+              style={{
+                background:
+                  "linear-gradient(120deg, transparent 30%, color-mix(in oklch, var(--chart-1) 22%, transparent) 50%, transparent 70%)",
+              }}
+            />
             <div className="clay-screen relative h-[19rem] overflow-hidden sm:h-[24rem] lg:h-[26rem]">
               <Suspense
                 fallback={
                   <div className="flex size-full flex-col items-center justify-center gap-3">
                     <div className="clay-sm size-12 animate-pulse rounded-2xl" />
-                    <p className="hud-label !text-white/60">
-                      Initialising 3D visualisation…
-                    </p>
-                    <p className="max-w-[16rem] text-center text-[11px] leading-4 text-white/45">
-                      The page is fully usable before the 3D scene finishes loading.
-                    </p>
+                    <p className="hud-label !text-white/60">Initialising 3D visualisation…</p>
                   </div>
                 }
               >
@@ -167,10 +297,10 @@ export default function Landing() {
               </Suspense>
 
               <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
-                <span className="hud-label !text-[9.5px] !text-[color-mix(in_oklch,var(--hud-cyan)_85%,white)]">
-                  Optical terminal · acquisition sweep
+                <span className="hud-label flex items-center gap-1.5 !text-[9.5px] !text-[color-mix(in_oklch,var(--hud-cyan)_85%,white)]">
+                  <Sparkles className="size-3" aria-hidden="true" /> Two FSOC terminals · live 3D
                 </span>
-                <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--chart-5)_60%,transparent)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[color-mix(in_oklch,var(--chart-5)_88%,white)]">
+                <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--chart-5)_60%,transparent)] bg-black/25 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[color-mix(in_oklch,var(--chart-5)_88%,white)] backdrop-blur">
                   Illustrative
                 </span>
               </div>
@@ -181,29 +311,26 @@ export default function Landing() {
                   { label: "Tolerance", value: `${SIM.coarseToleranceDeg}°` },
                   { label: "Sensor", value: `${SIM.frameWidth}×${SIM.frameHeight}` },
                 ].map((item) => (
-                  <div
+                  <motion.div
                     key={item.label}
+                    whileHover={reduced ? undefined : { scale: 1.04 }}
                     className="rounded-2xl bg-white/5 px-2.5 py-2 backdrop-blur-sm"
                   >
-                    <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-white/50">
-                      {item.label}
-                    </p>
-                    <p className="hud-value mt-0.5 text-xs font-semibold text-white/90">
-                      {item.value}
-                    </p>
-                  </div>
+                    <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-white/50">{item.label}</p>
+                    <p className="hud-value mt-0.5 text-xs font-semibold text-white/90">{item.value}</p>
+                  </motion.div>
                 ))}
               </div>
             </div>
             <p className="mt-3 flex flex-wrap items-center gap-2 px-1 text-[11px] leading-5 text-muted-foreground">
               <SimulatedTag>Prototype assumptions</SimulatedTag>
-              Field of view, tolerance and sensor size are design assumptions used by the
-              simulation. They are not measured hardware specifications.
+              Drag to orbit · scroll to zoom · values are simulated.
             </p>
           </ClayPanel>
-        </Reveal>
+        </TiltCard>
       </section>
 
+      {/* ── WORKFLOW — interactive, hover-lift pills ─────────────────── */}
       <section aria-labelledby="workflow-heading">
         <SectionHeader
           eyebrow="Coarse alignment workflow"
@@ -214,20 +341,22 @@ export default function Landing() {
         <StaggerList className="mt-7 flex flex-wrap gap-2.5">
           {WORKFLOW.map((step, index) => (
             <StaggerItem key={step}>
-              <div className="clay-sm clay-hover flex items-center gap-2.5 rounded-full px-4 py-2.5">
-                <span className="hud-label !text-[9.5px]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+              <motion.div
+                whileHover={reduced ? undefined : { y: -3, scale: 1.03 }}
+                whileTap={reduced ? undefined : { scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                className="clay-sm clay-hover flex cursor-default items-center gap-2.5 rounded-full px-4 py-2.5"
+              >
+                <span className="hud-label !text-[9.5px]">{String(index + 1).padStart(2, "0")}</span>
                 <span className="text-sm font-medium text-foreground/90">{step}</span>
-                {index < WORKFLOW.length - 1 && (
-                  <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                )}
-              </div>
+                {index < WORKFLOW.length - 1 && <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden="true" />}
+              </motion.div>
             </StaggerItem>
           ))}
         </StaggerList>
       </section>
 
+      {/* ── CAPABILITIES — tilt + sheen on each card ─────────────────── */}
       <section aria-labelledby="capabilities-heading">
         <SectionHeader
           eyebrow="What the prototype does"
@@ -236,16 +365,33 @@ export default function Landing() {
           description="Each capability below is implemented in the running application. Values are produced by the simulation engine, and the interface labels them as such."
         />
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {CAPABILITIES.map((capability, index) => (
-            <Reveal key={capability.title} delay={index * 0.05}>
-              <FeatureCard icon={capability.icon} title={capability.title}>
-                {capability.body}
-              </FeatureCard>
+          {CAPABILITIES.map((cap, i) => (
+            <Reveal key={cap.title} delay={i * 0.05}>
+              <TiltCard>
+                <div className="clay group relative overflow-hidden p-5 transition-shadow hover:shadow-[12px_16px_30px_-12px_color-mix(in_oklch,var(--clay-shade)_55%,transparent)]">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{
+                      background:
+                        "radial-gradient(520px circle at 30% 0%, color-mix(in oklch, var(--chart-1) 10%, transparent), transparent 65%)",
+                    }}
+                  />
+                  <div className="relative">
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                      <cap.icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-3 text-sm font-semibold text-foreground">{cap.title}</h3>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">{cap.body}</p>
+                  </div>
+                </div>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
       </section>
 
+      {/* ── CREDIBILITY ──────────────────────────────────────────────── */}
       <section aria-labelledby="credibility-heading">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:items-start">
           <div>
@@ -264,10 +410,15 @@ export default function Landing() {
                   ["PROPOSED", "A future implementation idea. Not built yet."],
                 ] as const
               ).map(([label, meaning]) => (
-                <div key={label} className="clay-inset flex items-center gap-3 rounded-2xl px-4 py-3">
+                <motion.div
+                  key={label}
+                  whileHover={reduced ? undefined : { x: 4 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                  className="clay-inset flex items-center gap-3 rounded-2xl px-4 py-3"
+                >
                   <CredibilityTag label={label} />
                   <span className="text-xs leading-5 text-muted-foreground">{meaning}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -285,26 +436,41 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── CTA — gradient + floating orbs ──────────────────────────── */}
       <Reveal>
-        <ClayPanel size="lg" className="overflow-hidden p-7 sm:p-10">
-          <div className="flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="clay-lg relative overflow-hidden p-7 sm:p-10">
+          {/* animated gradient orbs */}
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-[radial-gradient(circle_at_center,color-mix(in_oklch,var(--chart-1)_22%,transparent),transparent_70%)] blur-2xl"
+            animate={reduced ? undefined : { scale: [1, 1.08, 1], opacity: [0.5, 0.7, 0.5] }}
+            transition={reduced ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-20 -left-20 size-72 rounded-full bg-[radial-gradient(circle_at_center,color-mix(in_oklch,var(--chart-2)_18%,transparent),transparent_70%)] blur-2xl"
+            animate={reduced ? undefined : { scale: [1, 1.06, 1], opacity: [0.45, 0.6, 0.45] }}
+            transition={reduced ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+          />
+          <div className="relative flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
               <div className="flex flex-wrap items-center gap-3">
-                <Crosshair className="size-5 text-primary" aria-hidden="true" />
+                <span className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <Crosshair className="size-4" aria-hidden="true" />
+                </span>
                 <p className="hud-label">Ready to review</p>
               </div>
               <h2 className="mt-3 text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Open the tracking console and run a simulated acquisition
+                Open the console and run a live acquisition
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Start tracking, enable target drift, engage auto align and watch the error
-                trace settle inside the tolerance band. The run is saved to your alignment
-                history so a reviewer can compare sessions.
+                Start tracking, nudge the target, enable drift, engage auto align and watch the
+                error trace settle inside the tolerance band. Every run is saved to your history.
               </p>
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row lg:flex-col">
               <Button asChild size="lg" className="clay-press rounded-full">
-                <Link to={isAuthenticated ? "/console" : "/auth?mode=signin&returnTo=%2Fconsole"}>
+                <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
                   <Target className="size-4" aria-hidden="true" />
                   Launch tracking console
                 </Link>
@@ -317,7 +483,7 @@ export default function Landing() {
               </Button>
             </div>
           </div>
-        </ClayPanel>
+        </div>
       </Reveal>
     </div>
   );

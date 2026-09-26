@@ -132,14 +132,16 @@ export function FeatureCard({
   footer?: ReactNode;
 }) {
   return (
-    <ClayPanel hoverable className="flex h-full flex-col gap-3 p-5">
-      <span className="clay-sm flex size-11 items-center justify-center rounded-2xl text-primary">
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      <h3 className="text-base font-semibold text-foreground">{title}</h3>
-      <p className="flex-1 text-sm leading-6 text-muted-foreground">{children}</p>
-      {footer && <div className="pt-1">{footer}</div>}
-    </ClayPanel>
+    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 340, damping: 18 }}>
+      <ClayPanel hoverable className="flex h-full flex-col gap-3 p-5">
+        <span className="clay-sm flex size-11 items-center justify-center rounded-2xl text-primary">
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="flex-1 text-sm leading-6 text-muted-foreground">{children}</p>
+        {footer && <div className="pt-1">{footer}</div>}
+      </ClayPanel>
+    </motion.div>
   );
 }
 

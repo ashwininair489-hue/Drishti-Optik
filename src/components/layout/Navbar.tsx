@@ -70,6 +70,11 @@ export function Navbar() {
               <span className="hidden xl:inline">Drishti AI</span>
             </button>
 
+            <Button asChild size="sm" variant="outline" className="clay-press hidden rounded-full px-4 sm:inline-flex">
+              <Link to="/login">
+                <span>Sign in</span>
+              </Link>
+            </Button>
             <Button asChild size="sm" className="clay-press rounded-full px-4">
               <Link to={isAuthenticated ? "/dashboard" : "/console"}>
                 <LayoutDashboard className="size-4" aria-hidden="true" />
@@ -138,7 +143,7 @@ export function Navbar() {
                   Ask Drishti AI
                 </button>
                 <Button asChild variant="outline" className="mt-2 w-full rounded-2xl">
-                  <Link to={isAuthenticated ? "/profile" : "/auth?mode=signin"} onClick={closeMenu}>
+                  <Link to={isAuthenticated ? "/profile" : "/login"} onClick={closeMenu}>
                     {isAuthenticated ? "Profile & settings" : "Sign in"}
                   </Link>
                 </Button>

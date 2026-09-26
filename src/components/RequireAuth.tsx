@@ -52,7 +52,7 @@ export function RequireAuth({
 
   if (!isAuthenticated) {
     const returnTo = `${location.pathname}${location.search}`;
-    const signInHref = `/auth?returnTo=${encodeURIComponent(returnTo)}`;
+    const signInHref = `/login?returnTo=${encodeURIComponent(returnTo)}`;
 
     if (redirectImmediately) {
       return <Navigate to={signInHref} replace />;
