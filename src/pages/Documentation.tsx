@@ -213,7 +213,7 @@ export default function Documentation() {
           {[
             {
               q: "Is this an ISRO product?",
-              a: "No. Drishti-Optik is an independent prototype software concept built around the stated ISRO problem statement on the Smart India Hackathon problem list. It is not developed, endorsed, certified or deployed by ISRO.",
+              a: "No. Drishti-Optik is an independent prototype software concept for FSOC coarse-alignment research and demonstration. It is not developed, endorsed, certified or deployed by ISRO.",
             },
             {
               q: "Can it control a real optical terminal?",

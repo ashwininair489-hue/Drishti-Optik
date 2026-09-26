@@ -15,8 +15,7 @@ export const SITE = {
   shortDescription:
     "Computer-vision-assisted coarse alignment for mobile free-space optical communication terminals.",
   statusBadge: "Prototype • Simulation Environment",
-  organisation: "Indian Space Research Organisation (ISRO) problem statement",
-  problemStatementId: "SIH26171",
+  organisation: "Indian Space Research Organisation (ISRO)",
   /** Canonical base used for canonical URLs, OG tags and the sitemap. */
   canonicalBase: "https://drishti-optik.example",
   contactNote:

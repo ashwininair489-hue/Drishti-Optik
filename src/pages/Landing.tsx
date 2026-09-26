@@ -223,7 +223,8 @@ export default function Landing() {
 
           <Reveal delay={0.18}>
             <p className="mt-5 max-w-xl text-xs leading-5 text-muted-foreground">
-              Built around the stated ISRO problem statement {SITE.problemStatementId}. {DISCLAIMERS.notIsro}
+              An independent prototype exploring AI-based virtual camera tracking for mobile FSOC
+              terminal coarse alignment. {DISCLAIMERS.notIsro}
             </p>
           </Reveal>
 

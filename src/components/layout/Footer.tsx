@@ -75,12 +75,7 @@ export function Footer() {
           size="sm"
           className="mt-4 flex flex-col gap-3 px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
         >
-          <p>
-            © {new Date().getFullYear()} Drishti-Optik prototype team ·{" "}
-            <span className="text-foreground/70">
-              Problem statement {SITE.problemStatementId}
-            </span>
-          </p>
+          <p>© {new Date().getFullYear()} Drishti-Optik prototype team · Independent prototype</p>
           <p className="max-w-xl sm:text-right">
             Not an official ISRO product unless explicitly stated by an official ISRO source.
           </p>

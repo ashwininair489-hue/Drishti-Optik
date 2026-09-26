@@ -5,8 +5,9 @@
 > Computer-vision-assisted coarse alignment for mobile free-space optical
 > communication terminals.
 
-A prototype **software concept** built around the stated ISRO problem statement
-on the Smart India Hackathon problem list (`SIH26171`, category: Software).
+A prototype **software concept** exploring AI-based virtual camera tracking for
+coarse alignment of mobile FSOC terminals — a simulation environment for research
+and demonstration.
 
 > **Not an official ISRO product.** Drishti-Optik is not developed, endorsed,
 > certified or deployed by ISRO. It connects to no optical terminal, ground
@@ -18,7 +19,7 @@ on the Smart India Hackathon problem list (`SIH26171`, category: Software).
 ## Version 1 scope
 
 Version 1 focuses on the **simulated virtual camera tracking console** for
-hackathon and problem-statement reviewers. Everything else exists to support that
+technical reviewers. Everything else exists to support that
 screen: accounts so a session can be saved, a monitoring dashboard, technical and
 architecture documentation, and the credibility and legal surfaces.
 

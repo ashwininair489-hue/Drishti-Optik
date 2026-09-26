@@ -3,7 +3,7 @@ import { Reveal } from "@/components/common/Reveal";
 import { PageHeader, SectionHeader } from "@/components/common/Section";
 import { CredibilityTag, TechBadge } from "@/components/common/Tags";
 import { usePageMeta } from "@/lib/seo";
-import { REFERENCES, SITE } from "@/lib/site";
+import { REFERENCES } from "@/lib/site";
 import { CheckCircle2, CircleSlash, Info, Landmark, Users } from "lucide-react";
 import { Link } from "react-router";
 
@@ -72,31 +72,31 @@ export default function About() {
       <section aria-labelledby="problem-statement">
         <SectionHeader
           id="problem-statement"
-          eyebrow="Problem statement"
-          title="Where the brief came from"
-          description="The project is built around the problem statement text supplied for this work."
+          eyebrow="Project focus"
+          title="Why this prototype exists"
+          description="An independent exploration of how vision-assisted tracking could support coarse alignment for mobile FSOC terminals."
         />
         <ClayPanel className="mt-6 p-6">
           <div className="flex flex-wrap items-center gap-2">
-            <TechBadge tone="busy">Reference {SITE.problemStatementId}</TechBadge>
-            <TechBadge tone="idle">Category: Software</TechBadge>
+            <TechBadge tone="busy">Domain: Free-space optical communication</TechBadge>
+            <TechBadge tone="idle">Focus: Coarse alignment</TechBadge>
           </div>
           <blockquote className="mt-4 border-l-4 border-primary/40 pl-4 text-sm italic leading-7 text-foreground/85">
-            “Development of an AI-Based Virtual Camera Tracking System for Coarse Alignment of
-            Mobile Free Space Optical Communication (FSOC) Terminals.”
+            “AI-Based Virtual Camera Tracking for Coarse Alignment of Mobile Free Space Optical
+            Communication (FSOC) Terminals.”
           </blockquote>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">
-            The organisation named against the brief is the Indian Space Research Organisation. The
-            brief itself sits in a public hackathon problem-statement catalogue; that catalogue
-            entry is the origin of this prototype, and nothing beyond it is claimed.
+            Drishti-Optik is an independent software prototype exploring computer-vision-assisted
+            coarse alignment. It is not developed, endorsed, or deployed by any space agency
+            unless explicitly stated by an official source, and no operational capability is
+            claimed.
           </p>
           <ClayInset className="mt-5 rounded-2xl p-4">
             <p className="hud-label">Scope for version 1</p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Version 1 focuses on the simulated tracking demo screen, aimed at hackathon and
-              problem-statement reviewers. Everything else in the application exists to support
-              that screen: accounts so a session can be saved, a dashboard summary, documentation,
-              and the credibility and legal surfaces.
+              Version 1 focuses on the simulated tracking demo screen. Everything else in the
+              application exists to support that screen: accounts so a session can be saved, a
+              dashboard summary, documentation, and the credibility and legal surfaces.
             </p>
           </ClayInset>
         </ClayPanel>

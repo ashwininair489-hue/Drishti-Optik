@@ -434,8 +434,7 @@ export default function Login() {
                   Prototype · Simulation
                 </TechBadge>
                 <span className="hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:flex">
-                  <Globe className="size-3" aria-hidden="true" />
-                  SIH26171
+                  <Globe className="size-3" aria-hidden="true" /> Prototype
                 </span>
               </div>
 

@@ -130,7 +130,7 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     title: "Is this an ISRO product?",
     keywords: ["isro", "official", "government", "endorsed", "who made", "developed by"],
     answer:
-      "No. Drishti-Optik is an independent prototype software concept developed around a stated ISRO problem statement on the Smart India Hackathon problem list. It is not developed, endorsed, certified or deployed by ISRO, and nothing in this site should be read as an official ISRO statement. ISRO's own public pages remain the authority for anything about ISRO's programmes.",
+      "No. Drishti-Optik is an independent prototype software concept for FSOC coarse-alignment research and demonstration. It is not developed, endorsed, certified or deployed by ISRO, and nothing in this site should be read as an official ISRO statement. ISRO's own public pages remain the authority for anything about ISRO's programmes.",
     followUps: ["Where can I read the sources?", "Who is this demo for?"],
   },
   {
