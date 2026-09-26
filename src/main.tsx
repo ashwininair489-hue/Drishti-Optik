@@ -174,6 +174,7 @@ createRoot(document.getElementById("root")!).render(
                     path="/dashboard"
                     element={
                       <RequireAuth
+                        redirectImmediately
                         title="Sign in to open your dashboard"
                         description="The monitoring dashboard summarises your simulation sessions and system health."
                       >
@@ -185,6 +186,7 @@ createRoot(document.getElementById("root")!).render(
                     path="/console"
                     element={
                       <RequireAuth
+                        redirectImmediately
                         title="Sign in to launch the tracking console"
                         description="The virtual camera tracking console runs the coarse alignment simulation and saves your sessions."
                       >
@@ -196,6 +198,7 @@ createRoot(document.getElementById("root")!).render(
                     path="/profile"
                     element={
                       <RequireAuth
+                        redirectImmediately
                         title="Sign in to manage your profile"
                         description="Profile and settings are scoped to your account."
                       >

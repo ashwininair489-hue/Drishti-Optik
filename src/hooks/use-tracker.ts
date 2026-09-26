@@ -2,8 +2,11 @@ import { track } from "@/lib/analytics";
 import {
   SIM,
   createInitialState,
+  deriveMetrics,
   deriveTelemetry,
   trackerReducer,
+  type MotionPattern,
+  type ScenarioPresetId,
   type TrackingMode,
 } from "@/lib/tracking-engine";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
@@ -43,6 +46,7 @@ export function useTracker({
   const completionFiredRef = useRef(false);
 
   const telemetry = useMemo(() => deriveTelemetry(state), [state]);
+  const metrics = useMemo(() => deriveMetrics(state), [state]);
 
   // Advance the simulation on a fixed cadence while the session is running.
   useEffect(() => {
@@ -96,6 +100,26 @@ export function useTracker({
     track("auto_align_engaged");
   }, []);
 
+  const setMotionPattern = useCallback(
+    (pattern: MotionPattern) => dispatch({ type: "setMotionPattern", pattern }),
+    [],
+  );
+
+  const setNoiseIntensity = useCallback(
+    (intensity: number) => dispatch({ type: "setNoiseIntensity", intensity }),
+    [],
+  );
+
+  const triggerOcclusion = useCallback(
+    (durationTicks?: number) => dispatch({ type: "triggerOcclusion", durationTicks }),
+    [],
+  );
+
+  const applyPreset = useCallback(
+    (preset: ScenarioPresetId) => dispatch({ type: "applyPreset", preset }),
+    [],
+  );
+
   // Report the completed session once, then let the operator keep exploring.
   useEffect(() => {
     if (state.status !== "aligned" || completionFiredRef.current) return;
@@ -124,6 +148,7 @@ export function useTracker({
   return {
     state,
     telemetry,
+    metrics,
     controls: {
       start,
       pause,
@@ -135,6 +160,10 @@ export function useTracker({
       setTarget,
       nudgeTarget,
       autoAlign,
+      setMotionPattern,
+      setNoiseIntensity,
+      triggerOcclusion,
+      applyPreset,
     },
   };
 }

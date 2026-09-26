@@ -331,6 +331,42 @@ export default function Landing() {
         </TiltCard>
       </section>
 
+      {/* ── ENTRY GATE — login at the start (lively, cannot be missed) ─ */}
+      {!isAuthenticated && (
+        <Reveal>
+          <div className="clay-lg relative overflow-hidden p-6 sm:p-8">
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-10 -top-10 size-56 rounded-full bg-[radial-gradient(circle_at_center,color-mix(in_oklch,var(--chart-1)_18%,transparent),transparent_70%)] blur-2xl"
+              animate={reduced ? undefined : { scale: [1, 1.08, 1], opacity: [0.4, 0.6, 0.4] }}
+              transition={reduced ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="hud-label flex items-center gap-1.5">
+                  <span className="size-2 animate-pulse rounded-full bg-[color-mix(in_oklch,var(--chart-4)_70%,black)]" aria-hidden="true" />
+                  Start here — sign in to unlock the console
+                </p>
+                <h2 className="mt-2 text-balance text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                  Your simulation starts with a sign-in
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                  One-time email code or instant demo — no password, no hardware, no ISRO link. Every number after this is <span className="font-semibold text-foreground/80">SIMULATED DATA</span>.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2.5 sm:flex-row">
+                <Button asChild size="lg" className="clay-press rounded-full px-6">
+                  <Link to="/login?returnTo=%2Fconsole">Sign in — launch console</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="clay-press rounded-full px-6">
+                  <Link to="/login?mode=signup&returnTo=%2Fconsole">Create account</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      )}
+
       {/* ── WORKFLOW — interactive, hover-lift pills ─────────────────── */}
       <section aria-labelledby="workflow-heading">
         <SectionHeader

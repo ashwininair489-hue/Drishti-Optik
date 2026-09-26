@@ -12,7 +12,7 @@ import { Link, NavLink } from "react-router";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading, user, signOut } = useAuth();
   const { open } = useAssistant();
   const reduced = useReducedMotion();
   const closeMenu = () => setMobileOpen(false);
@@ -70,13 +70,21 @@ export function Navbar() {
               <span className="hidden xl:inline">Drishti AI</span>
             </button>
 
-            <Button asChild size="sm" variant="outline" className="clay-press hidden rounded-full px-4 sm:inline-flex">
-              <Link to="/login">
-                <span>Sign in</span>
-              </Link>
-            </Button>
+            {!isLoading && !isAuthenticated && (
+              <Button asChild size="sm" variant="outline" className="clay-press hidden rounded-full px-4 sm:inline-flex">
+                <Link to="/login">
+                  <span>Sign in</span>
+                </Link>
+              </Button>
+            )}
+            {!isLoading && isAuthenticated && user && (
+              <span className="hidden items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary sm:flex">
+                <span className="size-2 rounded-full bg-primary animate-pulse" aria-hidden="true" />
+                {user.name ?? user.email ?? "Signed in"}
+              </span>
+            )}
             <Button asChild size="sm" className="clay-press rounded-full px-4">
-              <Link to={isAuthenticated ? "/dashboard" : "/console"}>
+              <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
                 <LayoutDashboard className="size-4" aria-hidden="true" />
                 <span className="hidden sm:inline">
                   {isAuthenticated ? "Console" : "Launch Console"}
@@ -84,6 +92,16 @@ export function Navbar() {
                 <span className="sm:hidden">Console</span>
               </Link>
             </Button>
+            {isAuthenticated && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="clay-press hidden rounded-full px-3 sm:inline-flex"
+                onClick={() => signOut()}
+              >
+                Sign out
+              </Button>
+            )}
 
             <button
               type="button"
@@ -142,11 +160,24 @@ export function Navbar() {
                   <Sparkles className="size-4 text-primary" aria-hidden="true" />
                   Ask Drishti AI
                 </button>
-                <Button asChild variant="outline" className="mt-2 w-full rounded-2xl">
-                  <Link to={isAuthenticated ? "/profile" : "/login"} onClick={closeMenu}>
-                    {isAuthenticated ? "Profile & settings" : "Sign in"}
-                  </Link>
-                </Button>
+                {!isAuthenticated ? (
+                  <Button asChild variant="outline" className="mt-2 w-full rounded-2xl">
+                    <Link to="/login" onClick={closeMenu}>
+                      Sign in
+                    </Link>
+                  </Button>
+                ) : (
+                  <div className="mt-2 grid gap-2">
+                    <Button asChild variant="outline" className="w-full rounded-2xl">
+                      <Link to="/profile" onClick={closeMenu}>
+                        Profile &amp; settings
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full rounded-2xl" onClick={() => { closeMenu(); signOut(); }}>
+                      Sign out
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

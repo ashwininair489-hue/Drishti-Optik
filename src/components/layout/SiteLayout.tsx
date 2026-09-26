@@ -1,6 +1,7 @@
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Link, Outlet } from "react-router";
 
@@ -39,11 +40,12 @@ export function SiteLayout() {
 
 /** Sticky primary action on phones so the console is always one tap away. */
 function MobileCtaBar() {
+  const { isAuthenticated } = useAuth();
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 px-3 pb-3 sm:hidden">
       <div className="clay flex items-center gap-2 rounded-3xl p-2">
         <Button asChild className="h-11 flex-1 rounded-2xl">
-          <Link to="/console">
+          <Link to={isAuthenticated ? "/console" : "/login?returnTo=%2Fconsole"}>
             <PlayCircle className="size-4" aria-hidden="true" />
             Launch tracking console
           </Link>
