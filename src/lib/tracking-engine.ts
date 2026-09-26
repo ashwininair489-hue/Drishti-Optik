@@ -35,6 +35,14 @@ export const SIM = {
   distanceKm: 2.4,
   /** Nominal detection confidence at boresight (SIMULATED). */
   confidenceBase: 0.945,
+  /** Confidence the tracker must rebuild before a loss counts as re-acquired. */
+  reacquireConfidence: 0.55,
+  /** Modelled end-to-end pipeline latency (SIMULATED — never a measurement). */
+  baseLatencyMs: 42,
+  latencyPerDegreeMs: 7,
+  latencyConfidenceMs: 18,
+  /** Reported frame rate loses a few frames while the estimate is unstable. */
+  fpsConfidencePenalty: 4,
 } as const;
 
 export type TrackingStatus =
@@ -42,7 +50,12 @@ export type TrackingStatus =
   | "searching"
   | "acquiring"
   | "tracking"
+  | "lost"
+  | "reacquiring"
   | "aligned";
+
+/** Direction the operator should slew a single axis. */
+export type Guidance = "increase" | "decrease" | "hold";
 
 export type TrackingMode = "manual" | "assisted" | "auto";
 
@@ -53,6 +66,17 @@ export interface LogEntry {
   tick: number;
   level: LogLevel;
   message: string;
+}
+
+/** One sample of the rolling telemetry trace drawn by the console chart. */
+export interface HistoryPoint {
+  t: number;
+  errorDeg: number;
+  confidence: number;
+  /** Simulated sensor frame rate at that tick. */
+  fps: number;
+  /** Simulated end-to-end latency at that tick (milliseconds). */
+  latencyMs: number;
 }
 
 export interface TrackerState {
@@ -71,8 +95,14 @@ export interface TrackerState {
   eventSeq: number;
   peakErrorDeg: number;
   alignedAtTick: number | null;
+  /** True once a lock has been held in this session, so loss is distinguishable. */
+  hadLock: boolean;
+  /** How many times a held lock was lost. */
+  lossCount: number;
+  /** How many times a lost target was re-acquired. */
+  reacquireCount: number;
   /** Rolling trace of the alignment error, used by the console chart. */
-  history: Array<{ t: number; errorDeg: number; confidence: number }>;
+  history: HistoryPoint[];
 }
 
 export interface Telemetry {
@@ -100,6 +130,12 @@ export interface Telemetry {
   fovDeg: { azimuth: number; elevation: number };
   distanceKm: number;
   progress: number;
+  /** Which way the operator should slew each axis to close the error. */
+  guidance: { azimuth: Guidance; elevation: Guidance };
+  /** Simulated sensor frame rate. Not a measured throughput figure. */
+  simulatedFps: number;
+  /** Simulated end-to-end pipeline latency in milliseconds. Not measured. */
+  simulatedLatencyMs: number;
 }
 
 export type TrackerAction =
@@ -158,6 +194,9 @@ export function createInitialState(seed = 20260926): TrackerState {
     eventSeq: 1,
     peakErrorDeg: 0,
     alignedAtTick: null,
+    hadLock: false,
+    lossCount: 0,
+    reacquireCount: 0,
     history: [],
   };
 }
@@ -193,6 +232,14 @@ export function deriveTelemetry(state: TrackerState): Telemetry {
     state.status === "aligned" ||
     (inFov && errorMagnitudeDeg <= SIM.coarseToleranceDeg && state.running);
 
+  // A tight band around boresight reads as "hold": issuing a slew command for a
+  // few hundredths of a degree would be noise, not guidance.
+  const holdBand = SIM.coarseToleranceDeg / 4;
+  const guidance: { azimuth: Guidance; elevation: Guidance } = {
+    azimuth: Math.abs(errorAz) <= holdBand ? "hold" : errorAz > 0 ? "increase" : "decrease",
+    elevation: Math.abs(errorEl) <= holdBand ? "hold" : errorEl > 0 ? "increase" : "decrease",
+  };
+
   return {
     status: state.status,
     detected: inFov,
@@ -218,6 +265,17 @@ export function deriveTelemetry(state: TrackerState): Telemetry {
     fovDeg: { azimuth: fovAz, elevation: fovEl },
     distanceKm: SIM.distanceKm,
     progress: clamp(1 - errorMagnitudeDeg / (fovAz / 2), 0, 1),
+    guidance,
+    simulatedFps: round(
+      SIM.fps - (1 - state.confidence) * SIM.fpsConfidencePenalty,
+      1,
+    ),
+    simulatedLatencyMs: round(
+      SIM.baseLatencyMs +
+        errorMagnitudeDeg * SIM.latencyPerDegreeMs +
+        (1 - state.confidence) * SIM.latencyConfidenceMs,
+      1,
+    ),
   };
 }
 
@@ -411,11 +469,35 @@ export function trackerReducer(
           )
         : round(previous * 0.82, 3);
 
+      // Losing a held lock and losing the target before any lock are different
+      // events, and re-acquisition has hysteresis: confidence has to rebuild
+      // past a threshold before tracking is declared again.
+      const wasDisrupted = state.status === "lost" || state.status === "reacquiring";
+
       let status: TrackingStatus;
-      if (!inFov) status = "searching";
-      else if (remaining <= SIM.coarseToleranceDeg) status = "aligned";
-      else if (remaining <= SIM.fovAzimuthDeg / 2.4) status = "tracking";
-      else status = "acquiring";
+      if (!inFov) {
+        status = state.hadLock ? "lost" : "searching";
+      } else if (remaining <= SIM.coarseToleranceDeg) {
+        status = "aligned";
+      } else if (wasDisrupted) {
+        status =
+          confidence >= SIM.reacquireConfidence
+            ? remaining <= SIM.fovAzimuthDeg / 2.4
+              ? "tracking"
+              : "acquiring"
+            : "reacquiring";
+      } else if (remaining <= SIM.fovAzimuthDeg / 2.4) {
+        status = "tracking";
+      } else {
+        status = "acquiring";
+      }
+
+      const lockedNow = status === "tracking" || status === "aligned";
+      const hadLock = state.hadLock || lockedNow;
+      const lossCount =
+        state.lossCount + (status === "lost" && state.status !== "lost" ? 1 : 0);
+      const reacquireCount =
+        state.reacquireCount + (wasDisrupted && lockedNow ? 1 : 0);
 
       let events = state.events;
       let eventSeq = state.eventSeq;
@@ -425,6 +507,14 @@ export function trackerReducer(
           searching: {
             level: "warn",
             text: "Target outside field of view. Coarse re-point required.",
+          },
+          lost: {
+            level: "error",
+            text: "TRACKING LOST — target left the field of view. Re-centre or auto align to re-acquire.",
+          },
+          reacquiring: {
+            level: "warn",
+            text: "Re-acquisition in progress: target back in view, rebuilding tracking confidence.",
           },
           acquiring: {
             level: "info",
@@ -447,6 +537,16 @@ export function trackerReducer(
 
       const elapsedTicks = state.elapsedTicks + 1;
 
+      // Modelled throughput for the live telemetry chart. Latency grows with the
+      // bearing error and shrinks as confidence builds — never a measurement.
+      const fps = round(SIM.fps - (1 - confidence) * SIM.fpsConfidencePenalty, 1);
+      const latencyMs = round(
+        SIM.baseLatencyMs +
+          remaining * SIM.latencyPerDegreeMs +
+          (1 - confidence) * SIM.latencyConfidenceMs,
+        1,
+      );
+
       return {
         ...state,
         tick,
@@ -454,6 +554,9 @@ export function trackerReducer(
         target,
         status,
         confidence,
+        hadLock,
+        lossCount,
+        reacquireCount,
         elapsedTicks,
         peakErrorDeg: Math.max(state.peakErrorDeg, round(remaining, 3)),
         alignedAtTick:
@@ -462,7 +565,7 @@ export function trackerReducer(
         eventSeq,
         history: [
           ...state.history.slice(-239),
-          { t: elapsedTicks, errorDeg: round(remaining, 3), confidence },
+          { t: elapsedTicks, errorDeg: round(remaining, 3), confidence, fps, latencyMs },
         ],
       };
     }
@@ -482,11 +585,13 @@ export const fmt = {
 
 export const STATUS_COPY: Record<
   TrackingStatus,
-  { label: string; tone: "idle" | "busy" | "ok" | "warn" }
+  { label: string; tone: "idle" | "busy" | "ok" | "warn" | "error" }
 > = {
   idle: { label: "Idle", tone: "idle" },
   searching: { label: "Searching", tone: "warn" },
   acquiring: { label: "Acquiring", tone: "busy" },
   tracking: { label: "Tracking", tone: "busy" },
+  lost: { label: "Tracking lost", tone: "error" },
+  reacquiring: { label: "Re-acquiring", tone: "warn" },
   aligned: { label: "Coarse alignment complete", tone: "ok" },
 };

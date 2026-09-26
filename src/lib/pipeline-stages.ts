@@ -20,6 +20,11 @@ export function deriveStages(
   const running = status !== "idle";
   const locked = status === "tracking" || status === "aligned";
   const done = status === "aligned";
+  // A run that has held lock and then lost the target is a different event from
+  // one that never acquired: detection drops into ERROR and the downstream
+  // stages reset, rather than silently stalling in PROCESSING.
+  const lost = status === "lost";
+  const reacquiring = status === "reacquiring";
 
   // Nothing reports "completed" before a session is running: the target being
   // geometrically inside the field of view is not the same as the pipeline
@@ -27,13 +32,25 @@ export function deriveStages(
   return {
     input: running ? "completed" : "waiting",
     preprocess: running ? "completed" : "waiting",
-    detect: !running ? "waiting" : telemetry.detected ? "completed" : "processing",
+    detect: !running
+      ? "waiting"
+      : lost
+        ? "error"
+        : telemetry.detected
+          ? "completed"
+          : "processing",
     features: !running || !telemetry.detected
       ? "waiting"
       : locked
         ? "completed"
         : "processing",
-    track: !running ? "waiting" : locked ? "completed" : telemetry.detected ? "processing" : "waiting",
+    track: !running
+      ? "waiting"
+      : locked
+        ? "completed"
+        : reacquiring || telemetry.detected
+          ? "processing"
+          : "waiting",
     offset: running && telemetry.detected ? "completed" : "waiting",
     command: !running
       ? "waiting"
