@@ -3,7 +3,7 @@ import { ClayPanel } from "@/components/common/Clay";
 import { SimulatedTag } from "@/components/common/Tags";
 import { SIM, type Telemetry } from "@/lib/tracking-engine";
 import { cn } from "@/lib/utils";
-import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useMotionValue } from "framer-motion";
 import { Globe, Map, Scan, Target } from "lucide-react";
 
 interface WorldViewPanelProps {
@@ -50,8 +50,6 @@ export function WorldViewPanel({ telemetry, camera, className }: WorldViewPanelP
   // Kick the beacon a touch so it does not sit perfectly still.
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const rx = useSpring(useTransform(my, [-0.5, 0.5], [3, -3]), { stiffness: 120, damping: 14 });
-  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-3, 3]), { stiffness: 120, damping: 14 });
 
   function onMove(e: React.MouseEvent<HTMLDivElement>) {
     if (reduced || !ref.current) return;

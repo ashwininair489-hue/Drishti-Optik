@@ -21,7 +21,6 @@ import {
   Loader2,
   Mail,
   Orbit,
-  Rocket,
   Satellite,
   ShieldCheck,
   Sparkles,

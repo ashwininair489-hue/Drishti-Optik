@@ -51,7 +51,7 @@ export const SIM = {
   /** Occlusion hold time in ticks (SIMULATED). */
   occlusionDurationTicks: 90,
   /** Conversion helper. */
-  degToMrad: 17.453292519943295,
+  degToMrad: 17.453292519943297,
 } as const;
 
 export type TrackingStatus =

@@ -46,7 +46,7 @@ function StarField({ count = 90 }: { count?: number }) {
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     geom.current = g;
   }
-  useFrame((s) => {
+  useFrame(() => {
     if (!ref.current) return;
     ref.current.rotation.y += 0.0006;
   });

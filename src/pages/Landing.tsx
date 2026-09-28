@@ -1,6 +1,6 @@
 import { ClayPanel } from "@/components/common/Clay";
 import { Reveal, StaggerItem, StaggerList } from "@/components/common/Reveal";
-import { FeatureCard, SectionHeader, StatTile } from "@/components/common/Section";
+import { SectionHeader } from "@/components/common/Section";
 import { SourcesList } from "@/components/common/SourcesList";
 import { CredibilityTag, SimulatedTag, TechBadge } from "@/components/common/Tags";
 import { Button } from "@/components/ui/button";
@@ -139,6 +139,13 @@ export default function Landing() {
   const heroMy = useMotionValue(0);
   const spotX = useSpring(heroMx, { stiffness: 80, damping: 20 });
   const spotY = useSpring(heroMy, { stiffness: 80, damping: 20 });
+  // Hoisted out of the JSX below: calling useTransform inside a conditional
+  // branch changed the hook order between renders and crashed the page.
+  const spotlight = useTransform(
+    [spotX, spotY],
+    ([x, y]) =>
+      `radial-gradient(520px circle at ${x}% ${y}%, color-mix(in oklch, var(--chart-1) 10%, transparent), transparent 72%)`,
+  );
 
   usePageMeta({
     title: "Drishti-Optik | AI-Based Virtual Camera Tracking for FSOC",
@@ -163,13 +170,7 @@ export default function Landing() {
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 opacity-60"
-            style={{
-              background: useTransform(
-                [spotX, spotY],
-                ([x, y]) =>
-                  `radial-gradient(520px circle at ${x}% ${y}%, color-mix(in oklch, var(--chart-1) 10%, transparent), transparent 72%)`
-              ) as unknown as string,
-            }}
+            style={{ background: spotlight as unknown as string }}
           />
         )}
         <div className="hud-grid pointer-events-none absolute inset-0 opacity-[0.35]" aria-hidden="true" />
