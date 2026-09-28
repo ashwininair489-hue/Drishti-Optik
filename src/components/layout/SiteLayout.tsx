@@ -1,7 +1,6 @@
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Link, Outlet } from "react-router";
 import React, { Suspense } from "react";

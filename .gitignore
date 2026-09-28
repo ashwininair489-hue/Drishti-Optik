@@ -1,4 +1,10 @@
+.env
 .env.local
+.env.keys
+.env.*.local
 node_modules
 dist
+isolate
+coverage
+*.tsbuildinfo
 src/convex/_generated

@@ -8,7 +8,6 @@ import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
-import { RootErrorBoundaryDebug } from "./root-error-boundary-debug";
 
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
@@ -148,7 +147,7 @@ function RouteSyncer() {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RootErrorBoundaryDebug>
+    <RootErrorBoundary>
       <ToolbarErrorBoundary>
         <VlyToolbar />
       </ToolbarErrorBoundary>
@@ -220,6 +219,6 @@ createRoot(document.getElementById("root")!).render(
         </BrowserRouter>
         <Toaster />
       </ConvexAuthProvider>
-    </RootErrorBoundaryDebug>
+    </RootErrorBoundary>
   </StrictMode>,
 );

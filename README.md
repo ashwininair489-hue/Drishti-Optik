@@ -136,6 +136,23 @@ src/
 Never edit `.env` files directly; secrets are managed through the project's
 Keys / API keys tab.
 
+## Deploying to Vercel
+
+`vercel.json` builds the site with
+`bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL`,
+which deploys the Convex functions first and then builds the Vite app with the
+production deployment URL injected as `VITE_CONVEX_URL`.
+
+Because that command talks to Convex, the Vercel project needs one secret before
+the first deploy will succeed:
+
+| Variable | Where to set it | Purpose |
+| --- | --- | --- |
+| `CONVEX_DEPLOY_KEY` | Vercel project → Settings → Environment Variables (Production) | Production deploy key from the Convex dashboard. Without it the build step cannot authenticate and the deploy fails. |
+
+Set the project's **Install Command** to `bun install` and **Output Directory**
+to `dist` if Vercel does not pick them up from `vercel.json` automatically.
+
 ## Analytics and consent
 
 Analytics is **off until the visitor accepts it**. Optional events are limited to
