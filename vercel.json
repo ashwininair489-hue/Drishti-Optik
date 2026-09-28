@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL",
+  "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "installCommand": "bun install",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
