@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://drishti-optik.example/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://drishti-optik.example/technology</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://drishti-optik.example/architecture</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://drishti-optik.example/documentation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://drishti-optik.example/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://drishti-optik.example/contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://drishti-optik.example/auth</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://drishti-optik.example/privacy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://drishti-optik.example/terms</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+</urlset>

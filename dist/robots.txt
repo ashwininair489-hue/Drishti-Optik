@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /console
+Disallow: /profile
+
+Sitemap: https://drishti-optik.example/sitemap.xml
