@@ -150,8 +150,21 @@ the first deploy will succeed:
 | --- | --- | --- |
 | `CONVEX_DEPLOY_KEY` | Vercel project → Settings → Environment Variables (Production) | Production deploy key from the Convex dashboard. Without it the build step cannot authenticate and the deploy fails. |
 
-Set the project's **Install Command** to `bun install` and **Output Directory**
-to `dist` if Vercel does not pick them up from `vercel.json` automatically.
+To get the key: in the Convex dashboard open the project, create its production
+deployment if it does not exist yet, then generate a production deploy key from
+it (with the `deployment:deploy` permission enabled) and add it in Vercel under
+Environment Variables, scoped to Production only. Redeploy after saving.
+
+A freshly created production deployment does not inherit the development
+deployment's environment variables, so set `JWT_PRIVATE_KEY` and `JWKS` on it
+(copy the values from the development deployment) plus `SITE_URL` (the deployed
+URL); otherwise sign-in on the deployed site fails.
+
+Vercel's build container bundles Bun 1.3.x, which cannot read this project's
+`lockfileVersion: 2` lockfile, so `vercel.json` overrides the **Install Command**
+with `npx --yes bun@1.4.0 install --frozen-lockfile`. If the build log still
+shows `Unknown lockfile version`, set the same command under the Vercel project's
+Build & Development Settings and keep the **Output Directory** at `dist`.
 
 ## Analytics and consent
 
