@@ -139,26 +139,53 @@ Keys / API keys tab.
 ## Deploying to Vercel
 
 `vercel.json` builds the site with
-`bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL`,
-which deploys the Convex functions first and then builds the Vite app with the
-production deployment URL injected as `VITE_CONVEX_URL`.
 
-Because that command talks to Convex, the Vercel project needs one secret before
-the first deploy will succeed:
+```bash
+rm -f .env.local .env && bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL
+```
+
+`convex deploy` pushes the Convex functions to the production deployment, then
+runs the Vite build with that deployment's URL injected as `VITE_CONVEX_URL`. The
+`rm` step drops this repository's committed `.env.local`, which pins the
+*development* deployment (`dev:perfect-eel-747`); without it the build tries to
+authenticate as that dev deployment and fails with `MissingAccessToken`. Deleting
+`.env.local` and `.env.keys` from the repository (both were committed before the
+`.gitignore` entries were added) is still worth doing when convenient — the build
+no longer depends on them.
+
+### 1. Vercel environment variables
 
 | Variable | Where to set it | Purpose |
 | --- | --- | --- |
-| `CONVEX_DEPLOY_KEY` | Vercel project → Settings → Environment Variables (Production) | Production deploy key from the Convex dashboard. Without it the build step cannot authenticate and the deploy fails. |
+| `CONVEX_DEPLOY_KEY` | Vercel → Settings → Environment Variables, scoped to **Production** | Production deploy key from the Convex dashboard. Without it `convex deploy` fails with `MissingAccessToken`. |
 
-To get the key: in the Convex dashboard open the project, create its production
-deployment if it does not exist yet, then generate a production deploy key from
-it (with the `deployment:deploy` permission enabled) and add it in Vercel under
-Environment Variables, scoped to Production only. Redeploy after saving.
+Get the key from the Convex dashboard: open the project, create its **production
+deployment** if it does not exist yet, then Production → Settings → Deploy Keys →
+generate a production deploy key with the `deployment:deploy` permission and add
+it in Vercel, scoped to Production only. Do not set `CONVEX_DEPLOYMENT` or
+`VITE_CONVEX_URL` in Vercel — the build command supplies the production values.
+(Branch previews need a separate preview deploy key scoped to Preview if they
+should build too.)
 
-A freshly created production deployment does not inherit the development
-deployment's environment variables, so set `JWT_PRIVATE_KEY` and `JWKS` on it
-(copy the values from the development deployment) plus `SITE_URL` (the deployed
-URL); otherwise sign-in on the deployed site fails.
+### 2. Sign-in variables on the production deployment
+
+A fresh production deployment does not inherit the development deployment's
+variables, so sign-in would spin and then fail until they are set. Open Convex
+dashboard → project → **Production** → Settings → Environment Variables and add:
+
+| Variable | Value |
+| --- | --- |
+| `JWT_PRIVATE_KEY` | Copy the value from the development deployment's environment variables |
+| `JWKS` | Copy the value from the development deployment's environment variables |
+| `SITE_URL` | The deployed site URL, e.g. `https://drishti-optik.vercel.app` — update it if the domain changes |
+| `VLY_APP_NAME` | Optional: app name shown in the sign-in email |
+
+### 3. Redeploy and check sign-in
+
+Trigger a redeploy, then open the deployed site and sign in with a one-time email
+code (or the demo account). The `/console` route should open without a spinner.
+If the Vercel project has manual overrides under Settings → Build & Development
+Settings, clear them so `vercel.json` (build, install, output `dist`) applies.
 
 Vercel's build container bundles Bun 1.3.x, which cannot read this project's
 `lockfileVersion: 2` lockfile, so `vercel.json` overrides the **Install Command**
