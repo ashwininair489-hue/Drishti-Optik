@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "rm -f .env.local .env && bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL",
+  "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "installCommand": "npx --yes bun@1.4.0 install --frozen-lockfile",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
