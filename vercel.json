@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "if [ -n \"$CONVEX_DEPLOY_KEY\" ]; then echo \"CONVEX_DEPLOY_KEY set - deploying Convex functions to the production deployment\"; rm -f .env.local .env && bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL; else echo \"No CONVEX_DEPLOY_KEY - building frontend against the existing Convex deployment\"; bun run build; fi",
+  "buildCommand": "if [ -n \"$CONVEX_DEPLOY_KEY\" ]; then rm -f .env.local .env && bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL; else bun run build; fi",
   "outputDirectory": "dist",
   "installCommand": "npx --yes bun@1.4.0 install --frozen-lockfile",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
